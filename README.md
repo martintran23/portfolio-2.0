@@ -1,18 +1,18 @@
 # Portfolio 2.0
 
-This is a ground-up rewrite of my first [Pokémon Lab portfolio](https://martintran23.github.io/portfolio/). The goal is a cleaner site that still feels like me: projects, experience, and a way to get in touch.
+This is a ground-up rewrite of my first [Pokémon Lab portfolio](https://martintran23.github.io/portfolio/). The site is a small desktop of three rooms: a LinkedIn-inspired profile, a GitHub-inspired project browser, and a Gmail-inspired inbox for contact.
+
+See [CONCEPT.md](./CONCEPT.md) for structure, constraints, and build order.
 
 ## Status
 
-Early planning. This repo is a blank slate for now.
+Early planning. Concept is written; implementation has not started.
 
-## Planned sections
+## Rooms
 
-- **Home**: short intro and what I am looking for
-- **About**: background, interests, and how I work
-- **Projects**: selected work with write-ups and links
-- **Experience**: roles, internships, and programs
-- **Contact**: email and socials
+- **Profile** (`/`): intro, about, and experience
+- **Work** (`/work`): selected projects as repos, with case-study READMEs
+- **Mail** (`/mail`): compose form and socials
 
 ## Links
 
