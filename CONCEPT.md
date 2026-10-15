@@ -1,6 +1,6 @@
 # Portfolio 2.0 concept
 
-High-level reference for the site. The public README stays short; this file is the source of truth for structure, constraints, and build order.
+High-level reference for the site. The public README stays short; this file is the source of truth for structure, constraints, and build order. Locked copy lives in [COPY.md](./COPY.md).
 
 ## Pitch
 
@@ -43,7 +43,8 @@ LinkedIn-inspired: who I am, what I want, who I have been.
 
 - Header: name, headline, location, "open to" line
 - About: short, specific, not a bio dump
-- Experience: roles, internships, programs as a timeline on this same screen
+- Experience: SWE internships only (OpenQQuantify, Product Manager Accelerator)
+- Education: CSUF only
 - Optional: featured work that routes to `/work`
 
 This is the land-and-understand page. If someone never clicks an arrow, they still get intro, about, and experience.
@@ -55,7 +56,7 @@ GitHub-inspired: selected projects as repos, not a dump of every public repo.
 List view:
 
 - Name, one-line description, stack tags
-- Pins for the few that matter (ZotWatt, Playscape Spatial, and similar)
+- Pins for the few that matter (RevenueTwin, WeCalendar, WattTime)
 
 Repo view (click in):
 
@@ -97,10 +98,6 @@ Gmail-inspired compose, plus a labels-style rail for socials.
 4. **Mail**: form + social rail. Wire email later if needed; `mailto:` is enough at first.
 5. **Polish**: boot screen, motion between rooms, narrative file trees, then GitHub freshness if it still feels worth it.
 
-## Content to gather before UI polish
+## Content
 
-- One headline and one "what I am looking for" sentence
-- About paragraph (5–8 lines)
-- Experience bullets per role (not full LinkedIn paste)
-- 3–5 projects with: one-liner, problem, role, stack, links
-- For each featured project, a few "files" to show in the tree
+Gathered in [COPY.md](./COPY.md). Do not invent production KPIs. Do not add Pairnrd, H15DEN, or NASA L'SPACE.
