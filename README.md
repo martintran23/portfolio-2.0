@@ -6,7 +6,16 @@ See [CONCEPT.md](./CONCEPT.md) for structure and [COPY.md](./COPY.md) for locked
 
 ## Status
 
-Early planning. Concept is written; implementation has not started.
+Shell is in progress: three routes with dock, arrows, keyboard, and swipe. Room copy comes next.
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Then open [http://localhost:3000](http://localhost:3000). Use the dock, side arrows, or left/right keys. On a phone, swipe between rooms.
 
 ## Rooms
 
