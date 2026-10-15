@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-ink: #12141a;
+  --color-panel: #1b1e27;
+  --color-line: #2a2e3b;
+  --color-paper: #f4efe6;
+  --color-paper-ink: #1a1814;
+  --color-muted: #9a9388;
+  --color-accent: #d4a25a;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+}
