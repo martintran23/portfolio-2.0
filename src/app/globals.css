@@ -8,6 +8,15 @@
   --color-paper-ink: #1a1814;
   --color-muted: #9a9388;
   --color-accent: #d4a25a;
+  --color-li-canvas: #f3f2ef;
+  --color-li-card: #ffffff;
+  --color-li-border: #e0dfdc;
+  --color-li-text: #191919;
+  --color-li-muted: #666666;
+  --color-li-blue: #0a66c2;
+  --color-li-blue-hover: #004182;
+  --color-li-green: #057642;
+  --color-li-open: #e5f6eb;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
 }

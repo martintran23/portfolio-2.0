@@ -1,10 +1,5 @@
-import { RoomPlaceholder } from "@/components/RoomPlaceholder";
+import { ProfileRoom } from "@/components/ProfileRoom";
 
 export default function ProfilePage() {
-  return (
-    <RoomPlaceholder
-      title="Profile"
-      hint="Intro, about, and internships. Copy is locked in COPY.md."
-    />
-  );
+  return <ProfileRoom />;
 }
