@@ -39,23 +39,23 @@ Looking for Software Engineer / Backend / Applied AI internships where I can shi
 
 ### About
 
-I'm Martin, a Computer Science student at Cal State Fullerton (AI/ML concentration, expected Dec 2027) and a software engineer who likes building things people can actually use.
+I'm Martin Tran, a CS student at Cal State Fullerton building resilient backend systems, cloud architectures, and applied AI tooling.
 
-I work across the stack, but I'm most at home on the backend: services, data pipelines, schemas, and the glue that keeps apps reliable under real constraints.
+While I build across the entire stack, I spend most of my time behind the scenes: architecting event-driven data pipelines, securing database schemas, and ensuring services scale predictably under load.
 
-Lately I've been deep in cloud and applied AI: AWS (Bedrock, S3, Step Functions, Amplify), Supabase/Postgres with RLS, and agent workflows where the model investigates evidence while code owns the math.
+My recent work centers on AWS (Bedrock, Step Functions, S3) and modern Postgres backends with Row Level Security, frequently designing hybrid agent workflows where models parse context while strict code executes the business logic.
 
-I care about clean boundaries, tests that catch the weird cases, and turning technical systems into clear product behavior.
+I value modular design, tight system boundaries, and catching the weird failure modes before users do.
 
-Outside of code, I'm a Pokémon fan who built an interactive lab-themed portfolio, and I'm always open to connecting, learning, and exploring new opportunities.
+When I am not working on coursework, I am usually building side projects to test new architectures, experiment with game engines, and turn complex ideas into working software.
 
-Profile can show the first two paragraphs by default and the rest behind "see more." Keep the Pokémon line; it is the handoff to the old lab.
+Profile can show the first two paragraphs by default and the rest behind "see more."
 
 ### Experience
 
 #### Software Development Intern · OpenQQuantify · Remote / Vienna, VA
 
-May 2025 – Oct 2025
+May 2025 - Oct 2025
 
 - Built an AI health assistant chatbot on FDA drug label data (local LLMs / Hugging Face for semantic search and FAQ-style dialogue).
 - Improved FAQ accuracy by ~50% and cut response time by ~10 seconds.
@@ -64,9 +64,9 @@ May 2025 – Oct 2025
 
 #### AI Engineer Intern · Product Manager Accelerator · Remote
 
-Jun 2025 – Sep 2025
+Jun 2025 - Sep 2025
 
-On the Pokémon site as "AI Engineer Intern". LinkedIn: Software Engineer Intern – AI/ML. Use **AI Engineer Intern** here.
+On the Pokémon site as "AI Engineer Intern". LinkedIn: Software Engineer Intern - AI/ML. Use **AI Engineer Intern** here.
 
 - Built backend services for an AI-powered emotional support / journaling product (Kyrah AI MVP).
 - Designed MongoDB schemas and FastAPI endpoints for journal entries and chat history.

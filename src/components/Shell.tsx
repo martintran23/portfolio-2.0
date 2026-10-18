@@ -87,11 +87,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </button>
 
         <main
-          className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6 sm:px-16"
+          className={`mx-auto flex w-full flex-1 flex-col px-3 py-4 sm:px-6 ${
+            room.id === "profile" ? "max-w-5xl" : "max-w-4xl sm:px-16 sm:py-6"
+          }`}
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
         >
-          <div className="flex-1 overflow-auto rounded-2xl bg-paper text-paper-ink shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+          <div
+            className={`flex-1 overflow-auto shadow-[0_24px_80px_rgba(0,0,0,0.35)] ${
+              room.id === "profile"
+                ? "rounded-lg bg-li-canvas text-li-text"
+                : "rounded-2xl bg-paper text-paper-ink"
+            }`}
+          >
             {children}
           </div>
         </main>
