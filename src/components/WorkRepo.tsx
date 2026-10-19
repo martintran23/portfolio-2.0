@@ -28,10 +28,10 @@ function ReadmeSection({
 
 export function WorkRepo({ repo }: { repo: Repo }) {
   return (
-    <div className="min-h-full bg-white text-[#1f2328]">
+    <div className="min-h-full w-full min-w-0 overflow-x-hidden bg-white text-[#1f2328]">
       <div className="border-b border-[#d1d9e0] px-4 py-4 sm:px-6">
         <p className="text-sm text-[#59636e]">
-          <Link href="/work" className="text-[#0969da] hover:underline">
+          <Link href="/work/repositories" className="text-[#0969da] hover:underline">
             repositories
           </Link>
           <span className="px-1">/</span>
@@ -46,7 +46,7 @@ export function WorkRepo({ repo }: { repo: Repo }) {
         <p className="mt-2 text-sm text-[#59636e]">{repo.affiliation}</p>
       </div>
 
-      <div className="flex flex-col gap-6 p-4 sm:p-6 lg:flex-row">
+      <div className="flex min-w-0 flex-col gap-6 p-4 sm:p-6 xl:flex-row">
         <article className="min-w-0 flex-1 rounded-md border border-[#d1d9e0]">
           <div className="border-b border-[#d1d9e0] bg-[#f6f8fa] px-4 py-2 text-sm font-semibold">
             README.md
