@@ -75,7 +75,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </p>
       </header>
 
-      <div className="relative flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 min-w-0 flex-1">
         <button
           type="button"
           onClick={goPrev}
@@ -87,17 +87,21 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </button>
 
         <main
-          className={`mx-auto flex w-full flex-1 flex-col px-3 py-4 sm:px-6 ${
-            room.id === "profile" ? "max-w-5xl" : "max-w-4xl sm:px-16 sm:py-6"
+          className={`mx-auto flex w-full min-w-0 flex-1 flex-col px-3 py-4 sm:px-6 ${
+            room.id === "profile" || room.id === "work"
+              ? "max-w-5xl"
+              : "max-w-4xl sm:px-16 sm:py-6"
           }`}
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
         >
           <div
-            className={`flex-1 overflow-auto shadow-[0_24px_80px_rgba(0,0,0,0.35)] ${
+            className={`min-w-0 flex-1 shadow-[0_24px_80px_rgba(0,0,0,0.35)] ${
               room.id === "profile"
-                ? "rounded-lg bg-li-canvas text-li-text"
-                : "rounded-2xl bg-paper text-paper-ink"
+                ? "overflow-auto rounded-lg bg-li-canvas text-li-text"
+                : room.id === "work"
+                  ? "overflow-x-hidden overflow-y-auto rounded-lg bg-white text-[#1f2328]"
+                  : "overflow-auto rounded-2xl bg-paper text-paper-ink"
             }`}
           >
             {children}
