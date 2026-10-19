@@ -91,17 +91,17 @@ export const profile = {
   featuredWork: [
     {
       name: "RevenueTwin",
-      href: "/work",
+      href: "/work/revenuetwin",
       pitch: "AI revenue audit with deterministic fee math.",
     },
     {
       name: "WeCalendar",
-      href: "/work",
+      href: "/work/wecalendar",
       pitch: "Shared calendar and notes with realtime sync.",
     },
     {
       name: "WattTime",
-      href: "/work",
+      href: "/work/watttime",
       pitch: "Solar usage optimizer on AWS.",
     },
   ],

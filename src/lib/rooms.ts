@@ -23,6 +23,7 @@ export type RoomId = (typeof rooms)[number]["id"];
 
 export function getRoomIndex(pathname: string) {
   const path = pathname.replace(/\/$/, "") || "/";
-  const index = rooms.findIndex((room) => room.href === path);
-  return index === -1 ? 0 : index;
+  if (path.startsWith("/work")) return 1;
+  if (path.startsWith("/mail")) return 2;
+  return 0;
 }
