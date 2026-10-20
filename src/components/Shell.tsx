@@ -88,7 +88,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
         <main
           className={`mx-auto flex h-full min-h-0 w-full min-w-0 flex-1 flex-col px-3 py-4 sm:px-6 ${
-            room.id === "profile" || room.id === "work"
+            room.id === "profile" || room.id === "work" || room.id === "mail"
               ? "max-w-5xl"
               : "max-w-4xl sm:px-16 sm:py-6"
           }`}
@@ -101,7 +101,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 ? "overflow-auto rounded-lg bg-li-canvas text-li-text"
                 : room.id === "work"
                   ? "overflow-x-hidden overflow-y-auto rounded-lg bg-white text-[#1f2328]"
-                  : "overflow-auto rounded-2xl bg-paper text-paper-ink"
+                  : room.id === "mail"
+                    ? "overflow-x-hidden overflow-y-auto rounded-lg bg-gm-canvas text-gm-text"
+                    : "overflow-auto rounded-2xl bg-paper text-paper-ink"
             }`}
           >
             {children}
