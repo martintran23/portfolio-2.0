@@ -17,13 +17,23 @@
   --color-li-blue-hover: #004182;
   --color-li-green: #057642;
   --color-li-open: #e5f6eb;
+  --color-gm-canvas: #f6f8fc;
+  --color-gm-rail: #eaf1fb;
+  --color-gm-card: #ffffff;
+  --color-gm-border: #dadce0;
+  --color-gm-text: #202124;
+  --color-gm-muted: #5f6368;
+  --color-gm-compose: #c2e7ff;
+  --color-gm-send: #0b57d0;
+  --color-gm-send-hover: #0842a0;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
 }
 
 html,
 body {
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
