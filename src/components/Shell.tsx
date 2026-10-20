@@ -67,15 +67,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-ink text-paper">
-      <header className="flex items-center justify-between border-b border-line px-5 py-3">
+    <div className="flex h-dvh flex-col overflow-hidden bg-ink text-paper">
+      <header className="flex shrink-0 items-center justify-between border-b border-line px-5 py-3">
         <p className="text-sm tracking-wide">Martin Tran</p>
         <p className="text-xs uppercase tracking-[0.18em] text-muted">
           {room.label}
         </p>
       </header>
 
-      <div className="relative flex min-h-0 min-w-0 flex-1">
+      <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <button
           type="button"
           onClick={goPrev}
@@ -87,7 +87,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </button>
 
         <main
-          className={`mx-auto flex w-full min-w-0 flex-1 flex-col px-3 py-4 sm:px-6 ${
+          className={`mx-auto flex h-full min-h-0 w-full min-w-0 flex-1 flex-col px-3 py-4 sm:px-6 ${
             room.id === "profile" || room.id === "work"
               ? "max-w-5xl"
               : "max-w-4xl sm:px-16 sm:py-6"
@@ -121,7 +121,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       <nav
         aria-label="Rooms"
-        className="border-t border-line px-4 py-3"
+        className="shrink-0 border-t border-line bg-ink px-4 py-3"
       >
         <ul className="mx-auto flex max-w-md items-center justify-center gap-2">
           {rooms.map((item) => {
