@@ -1,16 +1,6 @@
 import Link from "next/link";
-import {
-  contributionMonths,
-  contributionTotal,
-  contributionWeeks,
-} from "@/data/contributions";
-import {
-  githubProfile,
-  languageColor,
-  listedRepos,
-  pinnedRepos,
-  type ListedRepo,
-} from "@/data/github";
+import { languageColor, type GithubProfile, type ListedRepo } from "@/data/github";
+import type { ContributionCalendar } from "@/lib/github";
 
 const levelColor = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
 
@@ -57,30 +47,30 @@ function LanguageDot({ language }: { language: string | null }) {
   );
 }
 
-function ContributionGraph() {
+function ContributionGraph({ calendar }: { calendar: ContributionCalendar }) {
   const cell = 11;
   const gap = 3;
   const step = cell + gap;
   const labelWidth = 26;
   const monthHeight = 16;
-  const width = labelWidth + contributionWeeks.length * step - gap;
+  const width = labelWidth + calendar.weeks.length * step - gap;
   const height = monthHeight + 7 * step - gap;
 
   return (
     <section className="w-full min-w-0 rounded-md border border-[#d1d9e0] p-3 sm:p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h2 className="text-sm font-normal text-[#1f2328]">
-          {contributionTotal} contributions in the last year
+          {calendar.total} contributions in the last year
         </h2>
-        <p className="text-xs text-[#0969da]">2026</p>
+        <p className="text-xs text-[#0969da]">{calendar.year}</p>
       </div>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="mt-3 block h-auto w-full"
         role="img"
-        aria-label={`${contributionTotal} contributions in the last year`}
+        aria-label={`${calendar.total} contributions in the last year`}
       >
-        {contributionMonths.map((month) => (
+        {calendar.months.map((month) => (
           <text
             key={`${month.label}-${month.index}`}
             x={labelWidth + month.index * step}
@@ -102,7 +92,7 @@ function ContributionGraph() {
             {label}
           </text>
         ))}
-        {contributionWeeks.map((week, weekIndex) =>
+        {calendar.weeks.map((week, weekIndex) =>
           week.map((level, dayIndex) => (
             <rect
               key={`${weekIndex}-${dayIndex}`}
@@ -131,13 +121,23 @@ function ContributionGraph() {
   );
 }
 
-function Overview() {
+function Overview({
+  calendar,
+  profile,
+  repos,
+}: {
+  calendar: ContributionCalendar;
+  profile: GithubProfile;
+  repos: ListedRepo[];
+}) {
+  const pinned = repos.filter((repo) => repo.pinned);
+
   return (
     <div className="w-full min-w-0 space-y-6">
       <section className="w-full min-w-0">
         <h2 className="mb-3 text-sm font-normal text-[#1f2328]">Pinned</h2>
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {pinnedRepos.map((repo) => (
+          {pinned.map((repo) => (
             <li
               key={repo.name}
               className="min-w-0 rounded-md border border-[#d1d9e0] p-4"
@@ -147,7 +147,7 @@ function Overview() {
                   repo={repo}
                   className="break-all text-sm font-semibold text-[#0969da] hover:underline"
                 >
-                  {githubProfile.login}/{repo.name}
+                  {profile.login}/{repo.name}
                 </RepoLink>
                 <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-[11px] text-[#59636e]">
                   Public
@@ -165,14 +165,14 @@ function Overview() {
         </ul>
       </section>
 
-      <ContributionGraph />
+      <ContributionGraph calendar={calendar} />
 
       <section>
         <h2 className="mb-2 text-sm font-normal text-[#1f2328]">
           Activity overview
         </h2>
         <p className="text-sm leading-6 text-[#59636e]">
-          Contributed to {pinnedRepos.map((repo) => repo.name).join(", ")}.
+          Contributed to {pinned.map((repo) => repo.name).join(", ")}.
           Counts come from public GitHub activity.
         </p>
       </section>
@@ -180,10 +180,10 @@ function Overview() {
   );
 }
 
-function RepositoryList() {
+function RepositoryList({ repos }: { repos: ListedRepo[] }) {
   return (
     <ul>
-      {listedRepos.map((repo) => (
+      {repos.map((repo) => (
         <li key={repo.name} className="border-b border-[#d1d9e0] py-5">
           <div className="flex flex-wrap items-center gap-2">
             <RepoLink
@@ -216,8 +216,14 @@ function RepositoryList() {
 
 export function WorkRoom({
   tab,
+  profile,
+  calendar,
+  repos,
 }: {
   tab: "overview" | "repositories";
+  profile: GithubProfile;
+  calendar: ContributionCalendar;
+  repos: ListedRepo[];
 }) {
   return (
     <div className="min-h-full w-full min-w-0 overflow-x-hidden bg-white text-[#1f2328]">
@@ -245,7 +251,7 @@ export function WorkRoom({
           >
             Repositories
             <span className="ml-2 rounded-full bg-[#eaeef2] px-2 py-0.5 text-xs text-[#59636e]">
-              {listedRepos.length}
+              {repos.length}
             </span>
           </Link>
         </nav>
@@ -255,21 +261,21 @@ export function WorkRoom({
         <aside className="flex w-full min-w-0 items-start gap-4 xl:block">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={githubProfile.avatar}
-            alt={`${githubProfile.name} GitHub avatar`}
+            src={profile.avatar}
+            alt={`${profile.name} GitHub avatar`}
             width={200}
             height={200}
             className="aspect-square w-24 max-w-full shrink-0 rounded-full border border-[#d1d9e0] object-cover sm:w-32 xl:w-full"
           />
           <div className="min-w-0 flex-1 xl:mt-4">
             <h1 className="text-2xl font-semibold leading-7">
-              {githubProfile.name}
+              {profile.name}
             </h1>
             <p className="text-xl font-light text-[#59636e]">
-              {githubProfile.login}
+              {profile.login}
             </p>
             <a
-              href={githubProfile.profileUrl}
+              href={profile.profileUrl}
               target="_blank"
               rel="noreferrer"
               className="mt-3 block max-w-xs rounded-md border border-[#d1d9e0] bg-[#f6f8fa] py-1.5 text-center text-sm font-semibold hover:bg-[#eaeef2] xl:max-w-none"
@@ -277,7 +283,7 @@ export function WorkRoom({
               Follow
             </a>
             <p className="mt-3 text-sm text-[#59636e]">
-              {githubProfile.followers} follower · {githubProfile.following}{" "}
+              {profile.followers} follower · {profile.following}{" "}
               following
             </p>
             <p className="mt-2 text-sm text-[#59636e]">Pacific Time</p>
@@ -285,7 +291,11 @@ export function WorkRoom({
         </aside>
 
         <div className="w-full min-w-0">
-          {tab === "overview" ? <Overview /> : <RepositoryList />}
+          {tab === "overview" ? (
+            <Overview calendar={calendar} profile={profile} repos={repos} />
+          ) : (
+            <RepositoryList repos={repos} />
+          )}
         </div>
       </div>
     </div>

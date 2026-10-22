@@ -20,7 +20,7 @@ Then open [http://localhost:3000](http://localhost:3000). Use the dock, side arr
 ## Rooms
 
 - **Profile** (`/`): intro, about, and experience
-- **Projects** (`/work`): selected projects as repos, with case-study READMEs
+- **Projects** (`/work`): selected projects as repos, with case-study READMEs and a live GitHub contribution graph
 - **Mail** (`/mail`): compose form and socials
 
 ## Links

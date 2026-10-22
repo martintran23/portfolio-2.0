@@ -1,4 +1,14 @@
-export const githubProfile = {
+export type GithubProfile = {
+  name: string;
+  login: string;
+  avatar: string;
+  profileUrl: string;
+  followers: number;
+  following: number;
+  publicRepos: number;
+};
+
+export const githubProfile: GithubProfile = {
   name: "Martin Tran",
   login: "martintran23",
   avatar: "https://avatars.githubusercontent.com/u/190976810?v=4",

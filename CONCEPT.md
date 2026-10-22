@@ -66,7 +66,7 @@ Repo view (click in):
 Deeper view:
 
 - A **narrative file tree**, not a clone of the real repo. Files exist to explain the system (`architecture.md`, `api/`, `what-id-redo.md`, a couple of highlighted source files).
-- GitHub API can supply freshness (language, updated at). It should not be the whole UI.
+- The contribution graph, follower counts, and star counts refresh from public GitHub. The repo list stays the selected case studies.
 
 ### Mail (`/mail`)
 
