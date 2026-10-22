@@ -20,6 +20,7 @@ export const githubProfile: GithubProfile = {
 
 export type ListedRepo = {
   name: string;
+  githubName?: string;
   description: string;
   language: string | null;
   stars: number;
@@ -50,7 +51,8 @@ export const listedRepos: ListedRepo[] = [
     pinned: true,
   },
   {
-    name: "zotwatt",
+    name: "WattTime",
+    githubName: "zotwatt",
     description:
       "Solar usage optimizer that recommends the best times to run household appliances from forecasted solar availability.",
     language: "TypeScript",

@@ -172,8 +172,8 @@ function Overview({
           Activity overview
         </h2>
         <p className="text-sm leading-6 text-[#59636e]">
-          Contributed to {pinned.map((repo) => repo.name).join(", ")}.
-          Counts come from public GitHub activity.
+          Contribution, repository, and star counts come from public GitHub
+          activity.
         </p>
       </section>
     </div>

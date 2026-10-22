@@ -131,7 +131,7 @@ export async function loadGithubRoom(): Promise<GithubRoomData> {
     Promise.all(
       listedRepos.map(async (repo) => {
         const data = await fetchGithubJson(
-          `https://api.github.com/repos/${login}/${repo.name}`,
+          `https://api.github.com/repos/${login}/${repo.githubName ?? repo.name}`,
         );
         return {
           name: repo.name,

@@ -35,7 +35,9 @@ Alt options (not default):
 
 ### Looking for
 
-Looking for Software Engineer / Backend / Applied AI internships where I can ship production systems, own APIs and data pipelines, and harden AI features that stay grounded in deterministic logic.
+Software Engineering / AI Engineering Internships
+
+Looking for a Software Engineering or AI Engineering internship with real ownership: backend systems I can take end to end, and applied AI I can own the same way.
 
 ### About
 
@@ -106,6 +108,10 @@ AFK easter egg (game): "Time to go job searching..."
 ## Projects (`/work`)
 
 Three featured repos. Strongest signal first. Pokémon Lab is not in this list.
+
+### Activity overview
+
+Contribution, repository, and star counts come from public GitHub activity.
 
 ### 1. RevenueTwin
 
@@ -251,7 +257,7 @@ Interactive FireRed/LeafGreen-style lab. Use as About personality / a dock extra
 
 ## Mail (`/mail`)
 
-**CTA:** Want to talk about internships, backend systems, or applied AI? Email me at 23martintran@gmail.com or reach out on LinkedIn.
+**CTA:** Email me at 23martintran@gmail.com or reach out on LinkedIn.
 
 | Channel | Value | Show |
 | --- | --- | --- |
