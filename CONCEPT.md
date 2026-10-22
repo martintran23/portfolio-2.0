@@ -6,7 +6,7 @@ High-level reference for the site. The public README stays short; this file is t
 
 A small desktop of three rooms, reached after a short boot.
 
-Not a game, and not pixel clones of LinkedIn, GitHub, or Gmail. Steal those products' information architecture, then restyle them as one OS: profile, work, mail. Hiring managers can scan. Engineers can dig.
+Not a game, and not pixel clones of LinkedIn, GitHub, or Gmail. Steal those products' information architecture, then restyle them as one OS: profile, projects, mail. Hiring managers can scan. Engineers can dig.
 
 The old Pokémon Lab site stays a linked extra, not a required screen.
 
@@ -25,7 +25,7 @@ The old Pokémon Lab site stays a linked extra, not a required screen.
 ```
 [boot, skippable]
         ↓
-┌──── Profile  /     ────┐  →  ┌──── Work  /work ────┐  →  ┌──── Mail  /mail ────┐
+┌──── Profile  /     ────┐  →  ┌──── Projects  /work ────┐  →  ┌──── Mail  /mail ────┐
 │ photo, headline        │     │ pinned repos        │     │ compose form        │
 │ about                  │     │ README case study   │     │ socials rail        │
 │ experience timeline    │     │ narrative file tree │     │                     │
@@ -45,11 +45,11 @@ LinkedIn-inspired: who I am, what I want, who I have been.
 - About: short, specific, not a bio dump
 - Experience: SWE internships only (OpenQQuantify, Product Manager Accelerator)
 - Education: CSUF only
-- Optional: featured work that routes to `/work`
+- Optional: featured projects that route to `/work`
 
 This is the land-and-understand page. If someone never clicks an arrow, they still get intro, about, and experience.
 
-### Work (`/work`)
+### Projects (`/work`)
 
 GitHub-inspired: selected projects as repos, not a dump of every public repo.
 
@@ -94,7 +94,7 @@ Gmail-inspired compose, plus a labels-style rail for socials.
 
 1. **App shell**: three routes, dock/arrows/keyboard, no real content yet. Prove navigation and deep links.
 2. **Profile**: copy + experience timeline. This is the page someone can send tomorrow.
-3. **Work list + README drill-in**: static project data in the repo. No API yet.
+3. **Projects list + README drill-in**: static project data in the repo. No API yet.
 4. **Mail**: form + social rail. Wire email later if needed; `mailto:` is enough at first.
 5. **Polish**: boot screen, motion between rooms, narrative file trees, then GitHub freshness if it still feels worth it.
 

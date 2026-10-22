@@ -84,7 +84,7 @@ export function ProfileRoom() {
                   href="/work"
                   className="rounded-full border border-li-blue px-4 py-1.5 text-sm font-semibold text-li-blue hover:bg-[#eaf3fb]"
                 >
-                  View work
+                  View projects
                 </Link>
               </div>
             </div>

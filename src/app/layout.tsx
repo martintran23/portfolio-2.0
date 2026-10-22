@@ -11,7 +11,7 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "Martin Tran",
   description:
-    "Portfolio of Martin Tran: profile, selected work, and a way to get in touch.",
+    "Portfolio of Martin Tran: profile, selected projects, and a way to get in touch.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

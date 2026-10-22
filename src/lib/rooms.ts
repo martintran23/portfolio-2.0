@@ -8,7 +8,7 @@ export const rooms = [
   {
     id: "work",
     href: "/work",
-    label: "Work",
+    label: "Projects",
     hint: "Selected projects as repos",
   },
   {
