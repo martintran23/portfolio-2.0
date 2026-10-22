@@ -470,8 +470,7 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
             name="subject"
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
-            placeholder="Internship / backend / applied AI"
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gm-muted"
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none"
           />
         </label>
 
