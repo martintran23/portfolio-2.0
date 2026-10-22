@@ -30,20 +30,53 @@ export function Shell({
   useEffect(() => {
     if (routeIndex === intendedIndex.current) {
       setDisplayIndex(routeIndex);
+      return;
     }
+
+    intendedIndex.current = routeIndex;
+    setDisplayIndex(routeIndex);
   }, [routeIndex]);
+
+  const showRoom = useCallback((nextIndex: number) => {
+    if (nextIndex < 0 || nextIndex >= rooms.length) return;
+    intendedIndex.current = nextIndex;
+    setDisplayIndex(nextIndex);
+  }, []);
 
   const goTo = useCallback(
     (nextIndex: number) => {
-      if (nextIndex < 0 || nextIndex >= rooms.length) return;
-      intendedIndex.current = nextIndex;
-      setDisplayIndex(nextIndex);
+      showRoom(nextIndex);
       if (nextIndex !== routeIndex) {
         router.push(rooms[nextIndex].href);
       }
     },
-    [routeIndex, router],
+    [routeIndex, router, showRoom],
   );
+
+  useEffect(() => {
+    function onClick(event: MouseEvent) {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+      if (anchor.target && anchor.target !== "_self") return;
+
+      const url = new URL(anchor.href, window.location.origin);
+      if (url.origin !== window.location.origin) return;
+
+      const nextIndex = getRoomIndex(url.pathname);
+      if (nextIndex === intendedIndex.current) return;
+      showRoom(nextIndex);
+    }
+
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, [showRoom]);
 
   const goPrev = useCallback(() => {
     goTo(index - 1);
