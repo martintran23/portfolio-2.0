@@ -143,7 +143,7 @@ export function Shell({
                   aria-current={active ? "page" : undefined}
                   className={`rounded-full px-4 py-2 text-sm transition ${
                     active
-                      ? "bg-accent text-ink"
+                      ? "bg-accent text-white"
                       : "text-stage-muted hover:bg-white hover:text-stage-ink"
                   }`}
                 >
