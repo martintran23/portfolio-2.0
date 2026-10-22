@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getRoomIndex, rooms, visualRoomOffset } from "@/lib/rooms";
@@ -20,17 +20,38 @@ export function Shell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const index = getRoomIndex(pathname);
+  const routeIndex = getRoomIndex(pathname);
+  const [displayIndex, setDisplayIndex] = useState(routeIndex);
+  const intendedIndex = useRef(routeIndex);
+  const index = displayIndex;
   const room = rooms[index];
   const startX = useRef<number | null>(null);
 
+  useEffect(() => {
+    if (routeIndex === intendedIndex.current) {
+      setDisplayIndex(routeIndex);
+    }
+  }, [routeIndex]);
+
+  const goTo = useCallback(
+    (nextIndex: number) => {
+      if (nextIndex < 0 || nextIndex >= rooms.length) return;
+      intendedIndex.current = nextIndex;
+      setDisplayIndex(nextIndex);
+      if (nextIndex !== routeIndex) {
+        router.push(rooms[nextIndex].href);
+      }
+    },
+    [routeIndex, router],
+  );
+
   const goPrev = useCallback(() => {
-    if (index > 0) router.push(rooms[index - 1].href);
-  }, [index, router]);
+    goTo(index - 1);
+  }, [goTo, index]);
 
   const goNext = useCallback(() => {
-    if (index < rooms.length - 1) router.push(rooms[index + 1].href);
-  }, [index, router]);
+    goTo(index + 1);
+  }, [goTo, index]);
 
   useEffect(() => {
     for (const nextRoom of rooms) {
@@ -98,6 +119,7 @@ export function Shell({
           {rooms.map((item, itemIndex) => {
             const offset = visualRoomOffset(itemIndex, index);
             const active = offset === 0;
+            const routeReady = itemIndex === routeIndex;
 
             return (
               <section
@@ -114,13 +136,14 @@ export function Shell({
                     roomTone[item.id]
                   }`}
                 >
-                  {active ? children : previews[item.id]}
+                  {active && routeReady ? children : previews[item.id]}
                 </div>
                 {active ? null : (
                   <Link
                     href={item.href}
                     aria-label={`Open ${item.label}`}
                     className="absolute inset-0 z-20"
+                    onClick={() => goTo(itemIndex)}
                   />
                 )}
               </section>
@@ -134,13 +157,14 @@ export function Shell({
         className="shrink-0 border-t border-stage-line bg-stage-chrome px-4 py-3"
       >
         <ul className="mx-auto flex max-w-md items-center justify-center gap-2">
-          {rooms.map((item) => {
+          {rooms.map((item, itemIndex) => {
             const active = item.href === room.href;
             return (
               <li key={item.id}>
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
+                  onClick={() => goTo(itemIndex)}
                   className={`rounded-full px-4 py-2 text-sm transition ${
                     active
                       ? "bg-accent text-white"
