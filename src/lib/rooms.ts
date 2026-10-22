@@ -8,7 +8,7 @@ export const rooms = [
   {
     id: "work",
     href: "/work",
-    label: "Work",
+    label: "Projects",
     hint: "Selected projects as repos",
   },
   {
@@ -26,4 +26,12 @@ export function getRoomIndex(pathname: string) {
   if (path.startsWith("/work")) return 1;
   if (path.startsWith("/mail")) return 2;
   return 0;
+}
+
+export function visualRoomOffset(index: number, current: number) {
+  const count = rooms.length;
+  let offset = index - current;
+  if (offset > count / 2) offset -= count;
+  if (offset < -count / 2) offset += count;
+  return offset;
 }

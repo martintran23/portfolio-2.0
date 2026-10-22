@@ -12,10 +12,10 @@ Use these on the site unless a later note overrides them.
 
 - **Headline:** Software engineer building backend systems, cloud workflows, and applied AI.
 - **Name on Profile:** Martin Tran
-- **Featured work (order):** RevenueTwin, WeCalendar, WattTime
+- **Featured projects (order):** RevenueTwin, WeCalendar, WattTime
 - **WeCalendar GitHub:** `https://github.com/martintran23/WeCalendar`
 - **WattTime live demo:** include `https://main.d3aftn56t13u83.amplifyapp.com`
-- **Pokémon Lab:** personality / About link only, not a featured Work card
+- **Pokémon Lab:** personality / About link only, not a featured Projects card
 - **Phone:** keep off Mail unless you later choose to show it
 - **Audience:** SWE intern recruiting. Do not present as a full-time engineer.
 - **Never on site:** Pairnrd, H15DEN, NASA L'SPACE
@@ -103,7 +103,7 @@ AFK easter egg (game): "Time to go job searching..."
 
 ---
 
-## Work (`/work`)
+## Projects (`/work`)
 
 Three featured repos. Strongest signal first. Pokémon Lab is not in this list.
 
@@ -241,7 +241,7 @@ watttime/
 └── what-id-redo.md          # Usage learning, confidence scores, utility rates
 ```
 
-### Not a featured Work card
+### Not a featured Projects card
 
 **Pokémon Lab Portfolio** · HTML/CSS/JS · https://martintran23.github.io/portfolio
 

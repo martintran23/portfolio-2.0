@@ -1,10 +1,28 @@
 "use client";
 
-import { useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { sendPortfolioMail } from "@/app/mail/actions";
 import { gmailComposeUrl, mail, mailtoUrl } from "@/data/mail";
 
 const emojis = ["👋", "🙂", "👍", "📌", "✨"];
+
+type Attachment = {
+  id: string;
+  file: File;
+};
+
+type DraftImage = {
+  id: string;
+  file: File;
+  url: string;
+};
 
 async function sendViaWeb3Forms({
   accessKey,
@@ -72,65 +90,157 @@ function IconButton({
   );
 }
 
+function formatSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function fileLabel(file: File) {
+  const name = file.name;
+  const dot = name.lastIndexOf(".");
+  const ext = dot >= 0 ? name.slice(dot + 1).toUpperCase() : "FILE";
+  return ext.slice(0, 4);
+}
+
+function safeUrl(raw: string) {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const withProtocol =
+    /^https?:\/\//i.test(trimmed) || /^mailto:/i.test(trimmed)
+      ? trimmed
+      : `https://${trimmed}`;
+
+  try {
+    const url = new URL(withProtocol);
+    if (
+      url.protocol !== "http:" &&
+      url.protocol !== "https:" &&
+      url.protocol !== "mailto:"
+    ) {
+      return null;
+    }
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
+function editorText(editor: HTMLDivElement | null) {
+  return (editor?.innerText ?? "").replace(/\u00a0/g, " ").trim();
+}
+
 export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [images, setImages] = useState<DraftImage[]>([]);
+  const [editorEmpty, setEditorEmpty] = useState(true);
   const [showFormat, setShowFormat] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
   const [showSendMenu, setShowSendMenu] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkText, setLinkText] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
   const [status, setStatus] = useState<
     "idle" | "sending" | "sent" | "failed" | "opened" | "blocked" | "invalid"
   >("idle");
   const [error, setError] = useState("");
   const [openedHref, setOpenedHref] = useState<string | null>(null);
-  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const attachRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
+  const linkPopoverRef = useRef<HTMLDivElement>(null);
+  const savedRange = useRef<Range | null>(null);
 
   const draft = useMemo(() => {
     const topic =
       subject.trim() || `Note from ${name.trim() || "portfolio visitor"}`;
-    const lines = [
-      `Name: ${name.trim()}`,
-      `Email: ${email.trim()}`,
-      "",
-      message.trim(),
-    ];
-
-    if (files.length > 0) {
-      lines.push(
-        "",
-        `Files noted: ${files.map((file) => file.name).join(", ")}`,
-      );
-    }
+    const lines = [`Name: ${name.trim()}`, `Email: ${email.trim()}`, "", message.trim()];
 
     return {
       topic,
       body: lines.join("\n"),
     };
-  }, [name, email, subject, message, files]);
+  }, [name, email, subject, message]);
 
   const gmailHref = gmailComposeUrl(mail.to, draft.topic, draft.body);
   const mailtoHref = mailtoUrl(mail.to, draft.topic, draft.body);
+  const hasDraftContent = Boolean(message.trim()) || images.length > 0;
 
-  function openHref(href: string) {
-    setShowSendMenu(false);
-    const popup = window.open(href, "_blank", "noopener,noreferrer");
-    if (!popup) {
-      setOpenedHref(href);
-      setStatus("blocked");
-      return;
+  const imagesRef = useRef<DraftImage[]>([]);
+  imagesRef.current = images;
+
+  useEffect(() => {
+    return () => {
+      for (const image of imagesRef.current) {
+        URL.revokeObjectURL(image.url);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!linkOpen) return;
+
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (linkPopoverRef.current?.contains(target)) return;
+      setLinkOpen(false);
     }
-    setOpenedHref(null);
-    setStatus("opened");
+
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setLinkOpen(false);
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [linkOpen]);
+
+  function syncMessage() {
+    const text = editorText(editorRef.current);
+    setMessage(text);
+    setEditorEmpty(!text && images.length === 0);
+  }
+
+  function focusEditor() {
+    editorRef.current?.focus();
+  }
+
+  function rememberSelection() {
+    const selection = window.getSelection();
+    if (
+      selection &&
+      selection.rangeCount > 0 &&
+      editorRef.current?.contains(selection.anchorNode)
+    ) {
+      savedRange.current = selection.getRangeAt(0).cloneRange();
+      return selection.toString();
+    }
+    savedRange.current = null;
+    return "";
+  }
+
+  function restoreSelection() {
+    const selection = window.getSelection();
+    if (!selection || !savedRange.current) return false;
+    selection.removeAllRanges();
+    selection.addRange(savedRange.current);
+    return true;
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) {
+    syncMessage();
+    const text = editorText(editorRef.current);
+    if (!name.trim() || !email.trim() || (!text && images.length === 0)) {
       setStatus("invalid");
       setError("");
       return;
@@ -140,6 +250,7 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
     setError("");
     setOpenedHref(null);
     setShowSendMenu(false);
+    setLinkOpen(false);
 
     try {
       const result = accessKey
@@ -148,16 +259,14 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
             name: name.trim(),
             email: email.trim(),
             topic: draft.topic,
-            body: draft.body,
+            body: [`Name: ${name.trim()}`, `Email: ${email.trim()}`, "", text].join(
+              "\n",
+            ),
           })
-        : await sendPortfolioMail(buildMailPayload());
+        : await sendPortfolioMail(buildMailPayload(text));
       if (result.ok) {
         setStatus("sent");
-        setName("");
-        setEmail("");
-        setSubject("");
-        setMessage("");
-        setFiles([]);
+        resetDraft();
         return;
       }
       setStatus("failed");
@@ -168,70 +277,138 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
     }
   }
 
-  function buildMailPayload() {
+  function buildMailPayload(text: string) {
     const payload = new FormData();
     payload.set("name", name.trim());
     payload.set("email", email.trim());
     payload.set("subject", subject.trim());
-    payload.set("message", message.trim());
+    payload.set("message", text);
     payload.set("company", "");
-    for (const file of files) {
-      payload.append("files", file, file.name);
+    for (const item of attachments) {
+      payload.append("files", item.file, item.file.name);
     }
     return payload;
   }
 
-  function wrapSelection(before: string, after = before) {
-    const field = messageRef.current;
-    if (!field) return;
-    const start = field.selectionStart;
-    const end = field.selectionEnd;
-    const selected = message.slice(start, end) || "text";
-    const next = message.slice(0, start) + before + selected + after + message.slice(end);
-    setMessage(next);
-    requestAnimationFrame(() => {
-      field.focus();
-      const cursor = start + before.length + selected.length + after.length;
-      field.setSelectionRange(cursor, cursor);
-    });
+  function applyFormat(command: "bold" | "italic" | "underline") {
+    focusEditor();
+    restoreSelection();
+    document.execCommand(command);
+    syncMessage();
   }
 
   function insertText(text: string) {
-    const field = messageRef.current;
-    if (!field) return;
-    const start = field.selectionStart;
-    const end = field.selectionEnd;
-    const next = message.slice(0, start) + text + message.slice(end);
-    setMessage(next);
-    requestAnimationFrame(() => {
-      field.focus();
-      const cursor = start + text.length;
-      field.setSelectionRange(cursor, cursor);
+    focusEditor();
+    restoreSelection();
+    document.execCommand("insertText", false, text);
+    syncMessage();
+  }
+
+  function openLinkPopover() {
+    const selected = rememberSelection();
+    setShowEmoji(false);
+    setShowFormat(false);
+    setShowSendMenu(false);
+    setLinkText(selected);
+    setLinkUrl("");
+    setLinkOpen(true);
+  }
+
+  function applyLink() {
+    const href = safeUrl(linkUrl);
+    const label = linkText.trim() || href;
+    if (!href || !label) return;
+
+    focusEditor();
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const link = document.createElement("a");
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.className = "text-gm-send underline";
+    link.textContent = label;
+
+    if (restoreSelection() && savedRange.current) {
+      savedRange.current.deleteContents();
+      savedRange.current.insertNode(link);
+    } else if (editorText(editor)) {
+      editor.append(" ");
+      editor.appendChild(link);
+    } else {
+      editor.appendChild(link);
+    }
+
+    const selection = window.getSelection();
+    selection?.collapseToEnd();
+    savedRange.current = null;
+    setLinkOpen(false);
+    syncMessage();
+  }
+
+  function addAttachments(list: FileList | File[] | null) {
+    const files = list ? Array.from(list) : [];
+    if (files.length === 0) return;
+    setAttachments((current) => [
+      ...current,
+      ...files.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+      })),
+    ]);
+  }
+
+  function addImages(list: FileList | File[] | null) {
+    const files = list ? Array.from(list) : [];
+    const next = files
+      .filter((file) => file.type.startsWith("image/"))
+      .map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        url: URL.createObjectURL(file),
+      }));
+    if (next.length === 0) return;
+    setImages((current) => [...current, ...next]);
+    setEditorEmpty(false);
+  }
+
+  function removeAttachment(id: string) {
+    setAttachments((current) => current.filter((item) => item.id !== id));
+  }
+
+  function removeImage(id: string) {
+    setImages((current) => {
+      const match = current.find((item) => item.id === id);
+      if (match) URL.revokeObjectURL(match.url);
+      const next = current.filter((item) => item.id !== id);
+      setEditorEmpty(!editorText(editorRef.current) && next.length === 0);
+      return next;
     });
   }
 
-  function insertLink() {
-    const url = window.prompt("Link URL");
-    if (!url) return;
-    wrapSelection("[", `](${url})`);
-  }
-
-  function addFiles(list: FileList | null) {
-    if (!list || list.length === 0) return;
-    setFiles((current) => [...current, ...Array.from(list)]);
-  }
-
-  function clearDraft() {
+  function resetDraft() {
+    if (editorRef.current) editorRef.current.innerHTML = "";
+    for (const image of images) {
+      URL.revokeObjectURL(image.url);
+    }
     setName("");
     setEmail("");
     setSubject("");
     setMessage("");
-    setFiles([]);
+    setAttachments([]);
+    setImages([]);
+    setEditorEmpty(true);
     setShowFormat(false);
     setShowEmoji(false);
-    setStatus("idle");
+    setLinkOpen(false);
     setError("");
     setOpenedHref(null);
+  }
+
+  function clearDraft() {
+    resetDraft();
+    setStatus("idle");
   }
 
   return (
@@ -293,47 +470,97 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
             name="subject"
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
-            placeholder="Internship / backend / applied AI"
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gm-muted"
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none"
           />
         </label>
 
-        <label className="flex min-h-0 flex-1 flex-col px-4 py-3">
-          <span className="sr-only">Message</span>
-          <textarea
-            required
-            ref={messageRef}
-            id="mail-message"
-            name="message"
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            placeholder="What should we talk about?"
-            className="min-h-40 flex-1 resize-y bg-transparent text-sm leading-6 outline-none placeholder:text-gm-muted"
-          />
-        </label>
+        <div className="flex min-h-0 flex-1 flex-col px-4 py-3">
+          <div className="relative min-h-40 flex-1">
+            {editorEmpty ? (
+              <p className="pointer-events-none absolute text-sm leading-6 text-gm-muted">
+                What should we talk about?
+              </p>
+            ) : null}
+            <div
+              ref={editorRef}
+              id="mail-message"
+              role="textbox"
+              aria-multiline="true"
+              aria-label="Message"
+              contentEditable
+              suppressContentEditableWarning
+              className="min-h-40 text-sm leading-6 outline-none [&_a]:text-gm-send [&_a]:underline"
+              onInput={syncMessage}
+            />
+          </div>
 
-        {files.length > 0 ? (
-          <ul className="flex flex-wrap gap-2 px-4 pb-2">
-            {files.map((file) => (
-              <li
-                key={`${file.name}-${file.size}`}
-                className="rounded-full bg-[#f1f3f4] px-3 py-1 text-xs text-gm-text"
-              >
-                {file.name}
-              </li>
-            ))}
-          </ul>
-        ) : null}
+          {images.length > 0 ? (
+            <ul className="mt-3 space-y-3">
+              {images.map((image) => (
+                <li key={image.id}>
+                  <figure className="relative max-w-md overflow-hidden rounded-lg border border-gm-border bg-[#f8f9fa]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={image.url}
+                      alt={image.file.name}
+                      className="max-h-64 w-full object-contain"
+                    />
+                    <button
+                      type="button"
+                      aria-label={`Remove ${image.file.name}`}
+                      onClick={() => removeImage(image.id)}
+                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-lg leading-none text-gm-muted shadow hover:bg-white"
+                    >
+                      ×
+                    </button>
+                    <figcaption className="truncate px-3 py-1.5 text-xs text-gm-muted">
+                      {image.file.name}
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {attachments.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {attachments.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center gap-3 rounded-lg border border-gm-border bg-white px-3 py-2"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#e8f0fe] text-[11px] font-semibold text-gm-send">
+                    {fileLabel(item.file)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm">{item.file.name}</p>
+                    <p className="text-xs text-gm-muted">
+                      {fileLabel(item.file)} · {formatSize(item.file.size)}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${item.file.name}`}
+                    onClick={() => removeAttachment(item.id)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none text-gm-muted hover:bg-[#f1f3f4]"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
 
         {showFormat ? (
           <div className="flex flex-wrap gap-1 border-t border-gm-border px-3 py-1">
-            <IconButton label="Bold" onClick={() => wrapSelection("**")}>
+            <IconButton label="Bold" onClick={() => applyFormat("bold")}>
               <span className="text-sm font-bold">B</span>
             </IconButton>
-            <IconButton label="Italic" onClick={() => wrapSelection("*")}>
+            <IconButton label="Italic" onClick={() => applyFormat("italic")}>
               <span className="text-sm italic">I</span>
             </IconButton>
-            <IconButton label="Underline" onClick={() => wrapSelection("<u>", "</u>")}>
+            <IconButton label="Underline" onClick={() => applyFormat("underline")}>
               <span className="text-sm underline">U</span>
             </IconButton>
           </div>
@@ -357,7 +584,7 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
           <div className="relative mr-1 flex">
             <button
               type="submit"
-              disabled={status === "sending"}
+              disabled={status === "sending" || !hasDraftContent}
               className="rounded-l-full bg-gm-send px-5 py-2 text-sm font-medium text-white hover:bg-gm-send-hover disabled:opacity-60"
             >
               {status === "sending" ? "Sending..." : "Send"}
@@ -397,27 +624,83 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
             label="Formatting options"
             onClick={() => {
               setShowEmoji(false);
+              setLinkOpen(false);
               setShowFormat((open) => !open);
             }}
           >
             <span className="text-sm font-medium">Aa</span>
           </IconButton>
-          <IconButton label="Attach files" onClick={() => attachRef.current?.click()}>
+          <IconButton
+            label="Attach files"
+            onClick={() => {
+              setLinkOpen(false);
+              attachRef.current?.click();
+            }}
+          >
             <PaperclipIcon />
           </IconButton>
-          <IconButton label="Insert link" onClick={insertLink}>
-            <LinkIcon />
-          </IconButton>
+          <div className="relative">
+            <IconButton label="Insert link" onClick={openLinkPopover}>
+              <LinkIcon />
+            </IconButton>
+            {linkOpen ? (
+              <div
+                ref={linkPopoverRef}
+                className="absolute bottom-full left-0 z-20 mb-2 w-[min(18rem,calc(100vw-3rem))] rounded-lg border border-gm-border bg-white p-3 shadow-lg"
+              >
+                <label className="block text-xs text-gm-muted">
+                  Text
+                  <input
+                    value={linkText}
+                    onChange={(event) => setLinkText(event.target.value)}
+                    className="mt-1 w-full rounded border border-gm-border px-2 py-1.5 text-sm text-gm-text outline-none focus:border-gm-send"
+                  />
+                </label>
+                <label className="mt-2 block text-xs text-gm-muted">
+                  URL
+                  <input
+                    value={linkUrl}
+                    onChange={(event) => setLinkUrl(event.target.value)}
+                    placeholder="https://"
+                    className="mt-1 w-full rounded border border-gm-border px-2 py-1.5 text-sm text-gm-text outline-none focus:border-gm-send"
+                  />
+                </label>
+                <div className="mt-3 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setLinkOpen(false)}
+                    className="rounded-full px-3 py-1.5 text-sm text-gm-muted hover:bg-[#f1f3f4]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={applyLink}
+                    className="rounded-full bg-gm-send px-3 py-1.5 text-sm font-medium text-white hover:bg-gm-send-hover"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
           <IconButton
             label="Insert emoji"
             onClick={() => {
               setShowFormat(false);
+              setLinkOpen(false);
               setShowEmoji((open) => !open);
             }}
           >
             <EmojiIcon />
           </IconButton>
-          <IconButton label="Insert image" onClick={() => imageRef.current?.click()}>
+          <IconButton
+            label="Insert image"
+            onClick={() => {
+              setLinkOpen(false);
+              imageRef.current?.click();
+            }}
+          >
             <ImageIcon />
           </IconButton>
           <span className="ml-auto">
@@ -429,23 +712,33 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
 
         <input
           ref={attachRef}
+          id="mail-attachments"
+          name="attachments"
           type="file"
           multiple
           className="hidden"
+          aria-hidden
+          tabIndex={-1}
           onChange={(event) => {
-            addFiles(event.target.files);
+            const files = event.target.files ? Array.from(event.target.files) : [];
             event.target.value = "";
+            addAttachments(files);
           }}
         />
         <input
           ref={imageRef}
+          id="mail-images"
+          name="images"
           type="file"
           accept="image/*"
           multiple
           className="hidden"
+          aria-hidden
+          tabIndex={-1}
           onChange={(event) => {
-            addFiles(event.target.files);
+            const files = event.target.files ? Array.from(event.target.files) : [];
             event.target.value = "";
+            addImages(files);
           }}
         />
       </form>
@@ -462,7 +755,7 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
                 : status === "blocked"
                   ? "The browser blocked the new tab."
                   : status === "invalid"
-                    ? "Add your name, email, and a message before sending."
+                    ? "Add your name, email, and a message or image before sending."
                     : "Send delivers this note to my inbox. Open in Gmail stays in the arrow menu if you prefer."}
         {status === "failed" || status === "blocked" ? (
           <>

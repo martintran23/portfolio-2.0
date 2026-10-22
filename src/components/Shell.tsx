@@ -1,11 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getRoomIndex, rooms } from "@/lib/rooms";
+import { getRoomIndex, rooms, visualRoomOffset } from "@/lib/rooms";
 
-export function Shell({ children }: { children: React.ReactNode }) {
+const roomTone: Record<(typeof rooms)[number]["id"], string> = {
+  profile: "bg-li-canvas text-li-text",
+  work: "bg-white text-[#1f2328]",
+  mail: "bg-gm-canvas text-gm-text",
+};
+
+export function Shell({
+  children,
+  previews,
+}: {
+  children: ReactNode;
+  previews: Record<(typeof rooms)[number]["id"], ReactNode>;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const index = getRoomIndex(pathname);
@@ -67,63 +79,59 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-ink text-paper">
-      <header className="flex shrink-0 items-center justify-between border-b border-line px-5 py-3">
+    <div className="flex h-dvh flex-col overflow-hidden bg-stage text-stage-ink">
+      <header className="flex shrink-0 items-center justify-between border-b border-stage-line bg-stage-chrome px-5 py-3">
         <p className="text-sm tracking-wide">Martin Tran</p>
-        <p className="text-xs uppercase tracking-[0.18em] text-muted">
+        <p className="text-xs uppercase tracking-[0.18em] text-stage-muted">
           {room.label}
         </p>
       </header>
 
-      <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
-        <button
-          type="button"
-          onClick={goPrev}
-          disabled={index === 0}
-          aria-label="Previous room"
-          className="absolute left-3 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-panel text-lg text-paper disabled:opacity-25 sm:flex"
-        >
-          ←
-        </button>
+      <div
+        className="relative min-h-0 min-w-0 flex-1 overflow-hidden"
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[#f3f5f8] blur-3xl" />
 
-        <main
-          className={`mx-auto flex h-full min-h-0 w-full min-w-0 flex-1 flex-col px-3 py-4 sm:px-6 ${
-            room.id === "profile" || room.id === "work" || room.id === "mail"
-              ? "max-w-5xl"
-              : "max-w-4xl sm:px-16 sm:py-6"
-          }`}
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-        >
-          <div
-            className={`min-w-0 flex-1 shadow-[0_24px_80px_rgba(0,0,0,0.35)] ${
-              room.id === "profile"
-                ? "overflow-auto rounded-lg bg-li-canvas text-li-text"
-                : room.id === "work"
-                  ? "overflow-x-hidden overflow-y-auto rounded-lg bg-white text-[#1f2328]"
-                  : room.id === "mail"
-                    ? "overflow-x-hidden overflow-y-auto rounded-lg bg-gm-canvas text-gm-text"
-                    : "overflow-auto rounded-2xl bg-paper text-paper-ink"
-            }`}
-          >
-            {children}
-          </div>
-        </main>
+        <div className="room-stage absolute inset-0">
+          {rooms.map((item, itemIndex) => {
+            const offset = visualRoomOffset(itemIndex, index);
+            const active = offset === 0;
 
-        <button
-          type="button"
-          onClick={goNext}
-          disabled={index === rooms.length - 1}
-          aria-label="Next room"
-          className="absolute right-3 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-panel text-lg text-paper disabled:opacity-25 sm:flex"
-        >
-          →
-        </button>
+            return (
+              <section
+                key={item.id}
+                aria-hidden={!active}
+                data-offset={offset}
+                className={`room-panel absolute top-3 bottom-3 left-1/2 w-[min(76vw,28rem)] sm:top-5 sm:bottom-5 sm:w-[min(68vw,54rem)] lg:w-[min(62vw,62rem)] ${
+                  active ? "z-20" : "z-10"
+                }`}
+              >
+                <div
+                  inert={active ? undefined : true}
+                  className={`room-face h-full min-w-0 overflow-x-hidden overflow-y-auto rounded-xl shadow-[0_24px_80px_rgba(32,36,48,0.18)] ${
+                    roomTone[item.id]
+                  }`}
+                >
+                  {active ? children : previews[item.id]}
+                </div>
+                {active ? null : (
+                  <Link
+                    href={item.href}
+                    aria-label={`Open ${item.label}`}
+                    className="absolute inset-0 z-20"
+                  />
+                )}
+              </section>
+            );
+          })}
+        </div>
       </div>
 
       <nav
         aria-label="Rooms"
-        className="shrink-0 border-t border-line bg-ink px-4 py-3"
+        className="shrink-0 border-t border-stage-line bg-stage-chrome px-4 py-3"
       >
         <ul className="mx-auto flex max-w-md items-center justify-center gap-2">
           {rooms.map((item) => {
@@ -135,8 +143,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   aria-current={active ? "page" : undefined}
                   className={`rounded-full px-4 py-2 text-sm transition ${
                     active
-                      ? "bg-accent text-ink"
-                      : "text-muted hover:bg-panel hover:text-paper"
+                      ? "bg-accent text-white"
+                      : "text-stage-muted hover:bg-white hover:text-stage-ink"
                   }`}
                 >
                   {item.label}
