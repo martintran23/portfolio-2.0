@@ -63,11 +63,11 @@ body {
 }
 
 .room-panel[data-offset="-1"] {
-  transform: translateX(calc(-50% - 82%)) translateZ(-120px) rotateY(34deg) scale(0.84);
+  transform: translateX(calc(-50% - 88%)) translateZ(-120px) rotateY(34deg) scale(0.84);
 }
 
 .room-panel[data-offset="1"] {
-  transform: translateX(calc(-50% + 82%)) translateZ(-120px) rotateY(-34deg) scale(0.84);
+  transform: translateX(calc(-50% + 88%)) translateZ(-120px) rotateY(-34deg) scale(0.84);
 }
 
 .room-face {

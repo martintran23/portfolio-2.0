@@ -104,7 +104,7 @@ export function Shell({
                 key={item.id}
                 aria-hidden={!active}
                 data-offset={offset}
-                className={`room-panel absolute top-3 bottom-3 left-1/2 w-[min(58vw,22rem)] sm:top-5 sm:bottom-5 sm:w-[min(50vw,44rem)] ${
+                className={`room-panel absolute top-3 bottom-3 left-1/2 w-[min(76vw,28rem)] sm:top-5 sm:bottom-5 sm:w-[min(68vw,54rem)] lg:w-[min(62vw,62rem)] ${
                   active ? "z-20" : "z-10"
                 }`}
               >
