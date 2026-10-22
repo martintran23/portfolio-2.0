@@ -65,7 +65,7 @@ export function ProfileRoom() {
             <div className="mt-4 rounded-lg bg-li-open px-4 py-3">
               <p className="text-sm font-semibold text-li-green">Open to work</p>
               <p className="mt-1 text-sm leading-6 text-li-text">
-                Software Engineer / Backend / Applied AI internships
+                Software Engineering / AI Engineering Internships
               </p>
               <p className="mt-1 text-sm leading-6 text-li-muted">
                 {profile.lookingFor}
@@ -85,6 +85,14 @@ export function ProfileRoom() {
               >
                 View projects
               </Link>
+              <a
+                href={profile.resumeHref}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-li-blue px-4 py-1.5 text-sm font-semibold text-li-blue hover:bg-[#eaf3fb]"
+              >
+                View resume
+              </a>
             </div>
           </div>
         </section>

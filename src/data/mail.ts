@@ -22,7 +22,7 @@ export function mailtoUrl(to: string, subject?: string, body?: string) {
 }
 
 export const mail = {
-  cta: "Want to talk about internships, backend systems, or applied AI? Email me at 23martintran@gmail.com or reach out on LinkedIn.",
+  cta: `Email me at ${profile.contacts.email} or reach out on LinkedIn.`,
   to: profile.contacts.email,
   labels: [
     {

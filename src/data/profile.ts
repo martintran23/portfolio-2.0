@@ -3,7 +3,7 @@ export const profile = {
   headline:
     "Software engineer building backend systems, cloud workflows, and applied AI.",
   lookingFor:
-    "Looking for Software Engineer / Backend / Applied AI internships where I can ship production systems, own APIs and data pipelines, and harden AI features that stay grounded in deterministic logic.",
+    "Looking for a Software Engineering or AI Engineering internship with real ownership: backend systems I can take end to end, and applied AI I can own the same way.",
   aboutPreview: [
     "I'm Martin Tran, a CS student at Cal State Fullerton building resilient backend systems, cloud architectures, and applied AI tooling.",
     "While I build across the entire stack, I spend most of my time behind the scenes: architecting event-driven data pipelines, securing database schemas, and ensuring services scale predictably under load.",
@@ -105,6 +105,7 @@ export const profile = {
       pitch: "Solar usage optimizer on AWS.",
     },
   ],
+  resumeHref: "/Martin-Tran-Resume.pdf",
   contacts: {
     email: "23martintran@gmail.com",
     linkedin: "https://www.linkedin.com/in/23martintran/",

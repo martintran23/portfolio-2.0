@@ -170,6 +170,7 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
   const gmailHref = gmailComposeUrl(mail.to, draft.topic, draft.body);
   const mailtoHref = mailtoUrl(mail.to, draft.topic, draft.body);
   const hasDraftContent = Boolean(message.trim()) || images.length > 0;
+  const sendLooksEmpty = status === "invalid" && !hasDraftContent;
 
   const imagesRef = useRef<DraftImage[]>([]);
   imagesRef.current = images;
@@ -415,6 +416,7 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
     <section className="min-w-0">
       <form
         id="mail-compose"
+        noValidate
         onSubmit={onSubmit}
         className="flex min-h-[28rem] flex-col overflow-hidden rounded-xl border border-gm-border bg-gm-card shadow-[0_8px_28px_rgba(32,33,36,0.12)]"
       >
@@ -584,8 +586,12 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
           <div className="relative mr-1 flex">
             <button
               type="submit"
-              disabled={status === "sending" || !hasDraftContent}
-              className="rounded-l-full bg-gm-send px-5 py-2 text-sm font-medium text-white hover:bg-gm-send-hover disabled:opacity-60"
+              disabled={status === "sending"}
+              className={`rounded-l-full px-5 py-2 text-sm font-medium text-white ${
+                sendLooksEmpty
+                  ? "bg-[#4285f4]"
+                  : "bg-gm-send hover:bg-gm-send-hover"
+              }`}
             >
               {status === "sending" ? "Sending..." : "Send"}
             </button>
@@ -756,7 +762,7 @@ export function MailCompose({ accessKey = "" }: { accessKey?: string }) {
                   ? "The browser blocked the new tab."
                   : status === "invalid"
                     ? "Add your name, email, and a message or image before sending."
-                    : "Send delivers this note to my inbox. Open in Gmail stays in the arrow menu if you prefer."}
+                    : "Send delivers this note to my inbox. You can open it in Gmail from the arrow menu if you prefer."}
         {status === "failed" || status === "blocked" ? (
           <>
             {" "}
