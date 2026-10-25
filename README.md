@@ -8,7 +8,7 @@ This is a rewrite of my first [Pokémon Lab portfolio](https://martintran23.gith
 
 ## What you see
 
-A first visit can open with a short, skippable intro (moving shapes, then a desktop with a Martin Tran folder). After that, three rooms sit on one stage. Each room has its own URL.
+A first visit can open with a short, skippable intro (a power-on with the name Martin Tran, then a desktop with a Martin Tran folder). After that, three rooms sit on one stage. Each room has its own URL.
 
 - **Profile** (`/`): name, headline, what I am looking for, about, internships at OpenQQuantify and Product Manager Accelerator, CSUF, skills, featured work, and a resume link
 - **Projects** (`/work`): RevenueTwin, WeCalendar, and WattTime as selected repos, not a dump of every GitHub repo. Each opens a case-study README. Contribution, repository, and star counts come from public GitHub activity

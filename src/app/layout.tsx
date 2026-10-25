@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
+import { Intro } from "@/components/Intro";
 import "./globals.css";
 
 const geist = Geist({
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={geist.variable}>
       <body>
-        <AppShell>{children}</AppShell>
+        <Intro>
+          <AppShell>{children}</AppShell>
+        </Intro>
       </body>
     </html>
   );

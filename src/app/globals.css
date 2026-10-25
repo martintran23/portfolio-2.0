@@ -93,3 +93,124 @@ body {
     transition: none;
   }
 }
+
+.intro-boot-line {
+  opacity: 0;
+  animation: intro-boot-line 400ms ease both;
+}
+
+.intro-boot-line-a {
+  animation-delay: 180ms;
+}
+
+.intro-boot-line-b {
+  animation-delay: 480ms;
+}
+
+.intro-boot-line-c {
+  animation-delay: 780ms;
+}
+
+.intro-boot-bar {
+  width: 0;
+  animation: intro-boot-bar 1.15s ease 0.55s both;
+}
+
+.intro-boot-name {
+  animation: intro-boot-name 700ms ease 1.25s both;
+}
+
+@keyframes intro-boot-line {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-boot-bar {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes intro-boot-name {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.intro-desktop-bg {
+  animation: intro-desktop-fade 700ms ease both;
+}
+
+@keyframes intro-desktop-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.intro-cursor {
+  transform: translate(var(--intro-from-x, 50vw), var(--intro-from-y, 50vh));
+}
+
+.intro-cursor-move {
+  animation: intro-cursor-move 1.45s cubic-bezier(0.22, 0.8, 0.28, 1) 0.45s both;
+}
+
+.intro-cursor-click {
+  animation: intro-cursor-click 220ms ease both;
+}
+
+@keyframes intro-cursor-move {
+  from {
+    transform: translate(var(--intro-from-x), var(--intro-from-y));
+  }
+  to {
+    transform: translate(var(--intro-to-x), var(--intro-to-y));
+  }
+}
+
+@keyframes intro-cursor-click {
+  0% {
+    transform: translate(var(--intro-to-x), var(--intro-to-y)) scale(1);
+  }
+  45% {
+    transform: translate(var(--intro-to-x), var(--intro-to-y)) scale(0.82);
+  }
+  100% {
+    transform: translate(var(--intro-to-x), var(--intro-to-y)) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-boot-line,
+  .intro-boot-bar,
+  .intro-boot-name,
+  .intro-desktop-bg,
+  .intro-cursor-move,
+  .intro-cursor-click {
+    animation: none;
+  }
+
+  .intro-boot-line,
+  .intro-boot-name {
+    opacity: 1;
+  }
+
+  .intro-boot-bar {
+    width: 100%;
+  }
+}
