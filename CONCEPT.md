@@ -78,9 +78,10 @@ Gmail-inspired compose, plus a labels-style rail for socials.
 
 ## Boot
 
-- First visit only, ~1s, always skippable
-- No content hidden behind it on repeat visits
-- Can feel like an OS login/boot; keep it quiet
+- First visit only, always skippable, skipped on return visits
+- Beat 1: short power-on, then the name Martin Tran
+- Beat 2: empty classic desktop with a Martin Tran folder; a cursor moves from the center and clicks it open
+- Then the current 3-room portfolio
 
 ## Out of scope for v1
 
