@@ -15,7 +15,7 @@ Use these on the site unless a later note overrides them.
 - **Featured projects (order):** RevenueTwin, WeCalendar, WattTime
 - **WeCalendar GitHub:** `https://github.com/martintran23/WeCalendar`
 - **WattTime live demo:** include `https://main.d3aftn56t13u83.amplifyapp.com`
-- **Pokémon Lab:** personality / About link only, not a featured Projects card
+- **Pokémon Lab:** not on the site; not a featured Projects card
 - **Phone:** keep off Mail unless you later choose to show it
 - **Audience:** SWE intern recruiting. Do not present as a full-time engineer.
 - **Never on site:** Pairnrd, H15DEN, NASA L'SPACE
@@ -41,15 +41,13 @@ Looking for a Spring 2027 Software Engineering or AI Engineering internship or c
 
 ### About
 
-I'm Martin Tran, a CS student at Cal State Fullerton building resilient backend systems, cloud architectures, and applied AI tooling.
+I'm Martin Tran, a Computer Science student at Cal State Fullerton and software engineer specializing in resilient backend systems, cloud architectures, and applied AI tooling.
 
-While I build across the entire stack, I spend most of my time behind the scenes: architecting event-driven data pipelines, securing database schemas, and ensuring services scale predictably under load.
+Most of my work is centered around AI and ML applications, but I love exploring new tech and picking up whatever a project needs. I am open to learning new tools and fields along the way.
 
-My recent work centers on AWS (Bedrock, Step Functions, S3) and modern Postgres backends with Row Level Security, frequently designing hybrid agent workflows where models parse context while strict code executes the business logic.
+Right now, I'm working towards finishing my bachelor's degree, participating in hackathons, developing personal projects, and collaborating on an industry capstone with RTX. Outside of that, I'm usually building something small to try a new idea or clean up how a system fits together.
 
-I value modular design, tight system boundaries, and catching the weird failure modes before users do.
-
-When I am not working on coursework, I am usually building side projects to test new architectures, experiment with game engines, and turn complex ideas into working software.
+I'm currently looking for teams where I can own a real slice of the product, from how the data moves around to how people actually use it. I learn fastest when the work is concrete and I can see what breaks.
 
 Profile can show the first two paragraphs by default and the rest behind "see more."
 

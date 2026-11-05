@@ -124,8 +124,6 @@ export function ProfileRoom() {
           <AboutSection
             preview={profile.aboutPreview}
             more={profile.aboutMore}
-            labHref={profile.labHref}
-            labPhrase={profile.labPhrase}
           />
         </Card>
 
