@@ -18,6 +18,8 @@ export const githubProfile: GithubProfile = {
   publicRepos: 23,
 };
 
+export type RepoKind = "Hackathon" | "Hackathon Winner" | "Personal";
+
 export type ListedRepo = {
   name: string;
   githubName?: string;
@@ -27,6 +29,7 @@ export type ListedRepo = {
   href: string;
   external: boolean;
   pinned: boolean;
+  kind: RepoKind;
 };
 
 export const listedRepos: ListedRepo[] = [
@@ -39,6 +42,7 @@ export const listedRepos: ListedRepo[] = [
     href: "/work/revenuetwin",
     external: false,
     pinned: true,
+    kind: "Hackathon Winner",
   },
   {
     name: "WeCalendar",
@@ -49,6 +53,7 @@ export const listedRepos: ListedRepo[] = [
     href: "/work/wecalendar",
     external: false,
     pinned: true,
+    kind: "Personal",
   },
   {
     name: "WattTime",
@@ -60,6 +65,7 @@ export const listedRepos: ListedRepo[] = [
     href: "/work/watttime",
     external: false,
     pinned: true,
+    kind: "Hackathon",
   },
 ];
 

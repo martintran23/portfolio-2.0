@@ -3,7 +3,7 @@ export const profile = {
   headline:
     "Software engineer building backend systems, cloud workflows, and applied AI.",
   lookingFor:
-    "Looking for a Software Engineering or AI Engineering internship with real ownership: backend systems I can take end to end, and applied AI I can own the same way.",
+    "Looking for a Spring 2027 Software Engineering or AI Engineering internship or co-op with real ownership: backend systems I can take end to end, and applied AI I can own the same way.",
   aboutPreview: [
     "I'm Martin Tran, a CS student at Cal State Fullerton building resilient backend systems, cloud architectures, and applied AI tooling.",
     "While I build across the entire stack, I spend most of my time behind the scenes: architecting event-driven data pipelines, securing database schemas, and ensuring services scale predictably under load.",
@@ -21,23 +21,16 @@ export const profile = {
       company: "OpenQQuantify",
       location: "Remote / Vienna, VA",
       dates: "May 2025 - Oct 2025",
-      bullets: [
-        "Built an AI health assistant chatbot on FDA drug label data (local LLMs / Hugging Face for semantic search and FAQ-style dialogue).",
-        "Improved FAQ accuracy by ~50% and cut response time by ~10 seconds.",
-        "Built a Python ETL pipeline over 50K+ drug label records, cutting ~15 hrs/week of manual prep.",
-        "Designed RESTful APIs and a responsive chat frontend in an Agile, Git-based workflow.",
-      ],
+      summary:
+        "Worked on an AI health assistant that answered questions from FDA drug label data, spanning the data pipeline, APIs, and chat interface.",
     },
     {
       role: "AI Engineer Intern",
       company: "Product Manager Accelerator",
       location: "Remote",
       dates: "Jun 2025 - Sep 2025",
-      bullets: [
-        "Built backend services for an AI-powered emotional support / journaling product (Kyrah AI MVP).",
-        "Designed MongoDB schemas and FastAPI endpoints for journal entries and chat history.",
-        "Collaborated on branch-based Git workflows and schema updates for new features.",
-      ],
+      summary:
+        "Worked on the backend for Kyrah AI, an emotional support and journaling product, including how journal entries and chat history were stored and served.",
     },
   ],
   education: {

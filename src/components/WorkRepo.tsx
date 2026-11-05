@@ -40,7 +40,7 @@ export function WorkRepo({ repo }: { repo: Repo }) {
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold text-[#0969da]">{repo.name}</h1>
           <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]">
-            Public
+            {repo.kind}
           </span>
         </div>
         <p className="mt-2 text-sm text-[#59636e]">{repo.affiliation}</p>

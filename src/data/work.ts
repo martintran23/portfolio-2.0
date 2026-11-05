@@ -12,6 +12,7 @@ export const repos = [
       "Deterministic fee engine",
       "unittest",
     ],
+    kind: "Hackathon Winner",
     affiliation: "LPL Financial Hackathon 2026 · 1st Place Track Winner",
     pitch:
       "AI revenue audit that checks whether advisory agreements and actual billing stay aligned, with deterministic math for fees and Bedrock for evidence-grounded investigation.",
@@ -52,6 +53,7 @@ export const repos = [
       "Vercel",
       "GitHub Actions",
     ],
+    kind: "Personal",
     affiliation: "Personal Project · Aug 2026",
     pitch:
       "Shared calendar and notes for invite-code workspaces, with realtime sync, conflict-aware scheduling, and a full collaborative Notes system.",
@@ -89,6 +91,7 @@ export const repos = [
       "Open-Meteo",
       "LLM recommendations",
     ],
+    kind: "Hackathon",
     affiliation: "AWS Cloudhacks 2026 at UCI · Apr 2026",
     pitch:
       "Solar usage optimizer that recommends the best times to run household appliances from forecasted solar availability.",

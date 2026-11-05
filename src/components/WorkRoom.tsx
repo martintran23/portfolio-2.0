@@ -150,7 +150,7 @@ function Overview({
                   {profile.login}/{repo.name}
                 </RepoLink>
                 <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-[11px] text-[#59636e]">
-                  Public
+                  {repo.kind}
                 </span>
               </div>
               <p className="mt-2 text-xs leading-5 text-[#59636e]">
@@ -193,7 +193,7 @@ function RepositoryList({ repos }: { repos: ListedRepo[] }) {
               {repo.name}
             </RepoLink>
             <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]">
-              Public
+              {repo.kind}
             </span>
             {repo.pinned ? (
               <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]">

@@ -65,7 +65,7 @@ export function ProfileRoom() {
             <div className="mt-4 rounded-lg bg-li-open px-4 py-3">
               <p className="text-sm font-semibold text-li-green">Open to work</p>
               <p className="mt-1 text-sm leading-6 text-li-text">
-                Software Engineering / AI Engineering Internships
+                Spring 2027 internships and co-ops · Software Engineering / AI Engineering
               </p>
               <p className="mt-1 text-sm leading-6 text-li-muted">
                 {profile.lookingFor}
@@ -146,11 +146,9 @@ export function ProfileRoom() {
                   <p className="text-sm text-li-text">{job.company} · Internship</p>
                   <p className="text-sm text-li-muted">{job.dates}</p>
                   <p className="text-sm text-li-muted">{job.location}</p>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-li-text">
-                    {job.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
-                    ))}
-                  </ul>
+                  <p className="mt-2 text-sm leading-6 text-li-text">
+                    {job.summary}
+                  </p>
                 </div>
               </li>
             ))}
