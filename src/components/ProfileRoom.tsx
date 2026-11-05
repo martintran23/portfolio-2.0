@@ -65,7 +65,7 @@ export function ProfileRoom() {
             <div className="mt-4 rounded-lg bg-li-open px-4 py-3">
               <p className="text-sm font-semibold text-li-green">Open to work</p>
               <p className="mt-1 text-sm leading-6 text-li-text">
-                Software Engineering / AI Engineering Internships
+                Spring 2027 internships and co-ops · Software Engineering / AI Engineering
               </p>
               <p className="mt-1 text-sm leading-6 text-li-muted">
                 {profile.lookingFor}

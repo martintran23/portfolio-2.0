@@ -35,9 +35,9 @@ Alt options (not default):
 
 ### Looking for
 
-Software Engineering / AI Engineering Internships
+Spring 2027 internships and co-ops · Software Engineering / AI Engineering
 
-Looking for a Software Engineering or AI Engineering internship with real ownership: backend systems I can take end to end, and applied AI I can own the same way.
+Looking for a Spring 2027 Software Engineering or AI Engineering internship or co-op with real ownership: backend systems I can take end to end, and applied AI I can own the same way.
 
 ### About
 
