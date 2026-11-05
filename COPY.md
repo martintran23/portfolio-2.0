@@ -59,10 +59,7 @@ Profile can show the first two paragraphs by default and the rest behind "see mo
 
 May 2025 - Oct 2025
 
-- Built an AI health assistant chatbot on FDA drug label data (local LLMs / Hugging Face for semantic search and FAQ-style dialogue).
-- Improved FAQ accuracy by ~50% and cut response time by ~10 seconds.
-- Built a Python ETL pipeline over 50K+ drug label records, cutting ~15 hrs/week of manual prep.
-- Designed RESTful APIs and a responsive chat frontend in an Agile, Git-based workflow.
+Worked on an AI health assistant that answered questions from FDA drug label data, spanning the data pipeline, APIs, and chat interface.
 
 #### AI Engineer Intern · Product Manager Accelerator · Remote
 
@@ -70,9 +67,7 @@ Jun 2025 - Sep 2025
 
 On the Pokémon site as "AI Engineer Intern". LinkedIn: Software Engineer Intern - AI/ML. Use **AI Engineer Intern** here.
 
-- Built backend services for an AI-powered emotional support / journaling product (Kyrah AI MVP).
-- Designed MongoDB schemas and FastAPI endpoints for journal entries and chat history.
-- Collaborated on branch-based Git workflows and schema updates for new features.
+Worked on the backend for Kyrah AI, an emotional support and journaling product, including how journal entries and chat history were stored and served.
 
 Do not add Pairnrd, H15DEN, or NASA L'SPACE here.
 

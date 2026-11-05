@@ -21,23 +21,16 @@ export const profile = {
       company: "OpenQQuantify",
       location: "Remote / Vienna, VA",
       dates: "May 2025 - Oct 2025",
-      bullets: [
-        "Built an AI health assistant chatbot on FDA drug label data (local LLMs / Hugging Face for semantic search and FAQ-style dialogue).",
-        "Improved FAQ accuracy by ~50% and cut response time by ~10 seconds.",
-        "Built a Python ETL pipeline over 50K+ drug label records, cutting ~15 hrs/week of manual prep.",
-        "Designed RESTful APIs and a responsive chat frontend in an Agile, Git-based workflow.",
-      ],
+      summary:
+        "Worked on an AI health assistant that answered questions from FDA drug label data, spanning the data pipeline, APIs, and chat interface.",
     },
     {
       role: "AI Engineer Intern",
       company: "Product Manager Accelerator",
       location: "Remote",
       dates: "Jun 2025 - Sep 2025",
-      bullets: [
-        "Built backend services for an AI-powered emotional support / journaling product (Kyrah AI MVP).",
-        "Designed MongoDB schemas and FastAPI endpoints for journal entries and chat history.",
-        "Collaborated on branch-based Git workflows and schema updates for new features.",
-      ],
+      summary:
+        "Worked on the backend for Kyrah AI, an emotional support and journaling product, including how journal entries and chat history were stored and served.",
     },
   ],
   education: {

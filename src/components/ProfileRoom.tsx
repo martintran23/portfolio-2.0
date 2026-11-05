@@ -146,11 +146,9 @@ export function ProfileRoom() {
                   <p className="text-sm text-li-text">{job.company} · Internship</p>
                   <p className="text-sm text-li-muted">{job.dates}</p>
                   <p className="text-sm text-li-muted">{job.location}</p>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-li-text">
-                    {job.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
-                    ))}
-                  </ul>
+                  <p className="mt-2 text-sm leading-6 text-li-text">
+                    {job.summary}
+                  </p>
                 </div>
               </li>
             ))}
