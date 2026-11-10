@@ -2,378 +2,454 @@
 
 import { useEffect, useRef } from "react";
 
-export const introLandscape = {
-  skyTop: "#1260E8",
-  skyUpper: "#1974F2",
-  skyMid: "#328AF0",
-  skyLower: "#78ADF0",
-  skyHorizon: "#93BEF2",
-  leftY: 0.51,
-  crestX: 0.33,
-  crestY: 0.46,
-  rightY: 0.6,
-  cloudFarSpeed: 1.8,
-  cloudMidSpeed: 3.4,
-  cloudNearSpeed: 5.6,
-};
+const skyVertex = `
+attribute vec2 aClip;
+varying vec2 vUv;
+void main() {
+  vUv = aClip * 0.5 + 0.5;
+  gl_Position = vec4(aClip, 0.0, 1.0);
+}
+`;
 
-type Rng = () => number;
+const skyFragment = `
+precision highp float;
+varying vec2 vUv;
+uniform float uTime;
 
-const grassPalette = [
-  { t: 0, r: 36, g: 73, b: 21 },
-  { t: 0.16, r: 40, g: 84, b: 23 },
-  { t: 0.32, r: 53, g: 107, b: 25 },
-  { t: 0.5, r: 79, g: 140, b: 28 },
-  { t: 0.68, r: 105, g: 165, b: 31 },
-  { t: 0.84, r: 139, g: 189, b: 32 },
-  { t: 1, r: 154, g: 205, b: 36 },
-];
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
 
-function mulberry32(seed: number): Rng {
-  let t = seed >>> 0;
-  return () => {
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 5; i++) {
+    v += noise(p) * a;
+    p = p * 2.02 + vec2(1.7, 9.2);
+    a *= 0.5;
+  }
+  return v;
+}
+
+vec3 srgb(vec3 c) {
+  return pow(max(c, 0.0), vec3(0.4545));
+}
+
+void main() {
+  vec2 uv = vec2(vUv.x, 1.0 - vUv.y);
+  float y = uv.y;
+
+  vec3 zenith = vec3(0.005, 0.177, 0.680);
+  vec3 high = vec3(0.039, 0.330, 0.797);
+  vec3 mid = vec3(0.184, 0.488, 0.859);
+  vec3 low = vec3(0.511, 0.694, 0.908);
+  vec3 horizon = vec3(0.767, 0.859, 0.941);
+  vec3 shadowCol = vec3(0.339, 0.442, 0.573);
+  vec3 bodyCol = vec3(0.723, 0.782, 0.843);
+  vec3 litCol = vec3(0.974, 0.983, 1.0);
+
+  vec3 sky = mix(zenith, high, smoothstep(0.0, 0.26, y));
+  sky = mix(sky, mid, smoothstep(0.1, 0.42, y));
+  sky = mix(sky, low, smoothstep(0.28, 0.62, y));
+  sky = mix(sky, horizon, smoothstep(0.5, 0.9, y));
+
+  float band = smoothstep(0.0, 0.05, y) * (1.0 - smoothstep(0.46, 0.74, y));
+  vec2 farP = vec2(uv.x * 1.35 + uTime * 0.03, y * 0.7);
+  float farWarp = fbm(farP + vec2(2.2, 5.0));
+  float farN = fbm(farP + farWarp * vec2(0.32, 0.1));
+  float farShade = fbm(farP + vec2(0.24, 0.1));
+  float farMask = smoothstep(0.39, 0.52, farN);
+  float farLight = clamp(0.2 + (farN - farShade) * 4.0, 0.0, 1.0);
+  vec3 farCol = mix(shadowCol, litCol, farLight * farLight);
+  sky = mix(sky, farCol, farMask * band * 0.88);
+
+  vec2 nearP = vec2(uv.x * 2.5 + uTime * 0.055, y * 1.3 + uTime * 0.004);
+  vec2 nearWarp = vec2(fbm(nearP + vec2(3.3, 1.1)), fbm(nearP + vec2(7.7, 4.4)));
+  vec2 nearQ = nearP + (nearWarp - 0.45) * vec2(0.4, 0.3);
+  float nearN = fbm(nearQ);
+  float nearShade = fbm(nearQ + vec2(0.18, 0.08));
+  float nearMask = smoothstep(0.43, 0.57, nearN);
+  float nearLight = clamp(0.1 + (nearN - nearShade) * 4.2, 0.0, 1.0);
+  vec3 nearCol = mix(shadowCol, litCol, smoothstep(0.0, 0.85, nearLight));
+  nearCol = mix(bodyCol, nearCol, 0.8);
+  sky = mix(sky, nearCol, nearMask * band * 0.95);
+
+  gl_FragColor = vec4(srgb(sky), 1.0);
+}
+`;
+
+const landVertex = `
+attribute vec2 aUv;
+uniform mat4 uViewProj;
+uniform float uTime;
+varying vec3 vWorld;
+varying vec3 vNormal;
+varying float vFar;
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 5; i++) {
+    v += noise(p) * a;
+    p = p * 2.03 + vec2(3.1, 1.7);
+    a *= 0.5;
+  }
+  return v;
+}
+
+float terrain(vec2 xz) {
+  float far = clamp((2.4 - xz.y) / 10.0, 0.0, 1.0);
+  vec2 d = (xz - vec2(-4.8, -5.2)) * vec2(0.24, 0.3);
+  float hill = exp(-dot(d, d)) * 1.05;
+  hill *= smoothstep(0.12, 0.78, far);
+  hill *= mix(1.0, 0.45, smoothstep(-0.6, 4.2, xz.x));
+  float roll = sin(xz.x * 0.22) * 0.03 + sin(xz.y * 0.18) * 0.02;
+  roll += (fbm(xz * 0.16) - 0.5) * 0.07;
+  roll += (fbm(xz * 1.7 + 2.0) - 0.5) * 0.018;
+  return hill + roll;
+}
+
+void main() {
+  float x = (aUv.x - 0.5) * 18.0;
+  float z = mix(4.2, -8.4, aUv.y);
+  float y = terrain(vec2(x, z));
+  float e = 0.07;
+  float dx = terrain(vec2(x + e, z)) - terrain(vec2(x - e, z));
+  float dz = terrain(vec2(x, z + e)) - terrain(vec2(x, z - e));
+  vec3 normal = normalize(vec3(-dx, e * 2.0, -dz));
+  vec4 world = vec4(x, y, z, 1.0);
+  vWorld = world.xyz;
+  vNormal = normal;
+  vFar = clamp((3.2 - z) / 11.0, 0.0, 1.0);
+  gl_Position = uViewProj * world;
+}
+`;
+
+const landFragment = `
+precision highp float;
+varying vec3 vWorld;
+varying vec3 vNormal;
+varying float vFar;
+uniform float uTime;
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+    u.y
+  );
+}
+
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 4; i++) {
+    v += noise(p) * a;
+    p *= 2.05;
+    a *= 0.5;
+  }
+  return v;
+}
+
+vec3 srgb(vec3 c) { return pow(max(c, 0.0), vec3(0.4545)); }
+
+void main() {
+  vec3 n = normalize(vNormal);
+  float detail = smoothstep(0.9, 0.08, vFar);
+  float broad = fbm(vWorld.xz * 1.35);
+  float clump = fbm(vWorld.xz * 4.2 + 2.0);
+  float fine = fbm(vWorld.xz * vec2(14.0, 24.0));
+
+  vec3 grass = mix(vec3(0.1, 0.27, 0.06), vec3(0.18, 0.36, 0.08), broad);
+  grass = mix(grass, vec3(0.24, 0.42, 0.1), clump * 0.16);
+  grass *= 0.96 + fine * 0.08;
+
+  float bump = fbm(vWorld.xz * vec2(34.0, 70.0));
+  vec3 bumped = normalize(n + vec3((bump - 0.5) * 0.45, 0.15, (fine - 0.5) * 0.28) * detail);
+  vec3 sun = normalize(vec3(-0.35, 0.9, 0.22));
+  float wrap = clamp(dot(bumped, sun) * 0.45 + 0.55, 0.0, 1.0);
+  float ao = smoothstep(0.15, 0.85, n.y);
+  vec3 ambient = mix(vec3(0.16, 0.22, 0.11), vec3(0.58, 0.68, 0.74), clamp(bumped.y * 0.5 + 0.55, 0.0, 1.0));
+  float cloudShade = fbm(vWorld.xz * vec2(0.045, 0.028) + vec2(uTime * 0.045, 0.2));
+  vec3 color = grass * ambient * (0.84 + cloudShade * 0.1) * mix(0.88, 1.0, ao);
+  color += grass * vec3(1.0, 0.97, 0.88) * pow(wrap, 1.2) * 0.42;
+
+  color = mix(color, vec3(0.62, 0.76, 0.9), smoothstep(0.66, 1.0, vFar) * 0.26);
+  gl_FragColor = vec4(srgb(color), 1.0);
+}
+`;
+
+function compile(gl: WebGLRenderingContext, type: number, source: string) {
+  const shader = gl.createShader(type);
+  if (!shader) throw new Error("Could not create shader");
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const log = gl.getShaderInfoLog(shader) ?? "Shader failed";
+    gl.deleteShader(shader);
+    throw new Error(log);
+  }
+  return shader;
+}
+
+function program(gl: WebGLRenderingContext, vertex: string, fragment: string) {
+  const prog = gl.createProgram();
+  if (!prog) throw new Error("Could not create program");
+  gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, vertex));
+  gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, fragment));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    throw new Error(gl.getProgramInfoLog(prog) ?? "Program failed");
+  }
+  return prog;
+}
+
+function perspective(fov: number, aspect: number, near: number, far: number) {
+  const f = 1 / Math.tan(fov / 2);
+  const nf = 1 / (near - far);
+  const m = new Float32Array(16);
+  m[0] = f / aspect;
+  m[5] = f;
+  m[10] = (far + near) * nf;
+  m[11] = -1;
+  m[14] = 2 * far * near * nf;
+  return m;
+}
+
+function lookAt(eye: number[], target: number[], up: number[]) {
+  const z = normalize([eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]]);
+  const x = normalize(cross(up, z));
+  const y = cross(z, x);
+  const m = new Float32Array(16);
+  m[0] = x[0];
+  m[1] = y[0];
+  m[2] = z[0];
+  m[4] = x[1];
+  m[5] = y[1];
+  m[6] = z[1];
+  m[8] = x[2];
+  m[9] = y[2];
+  m[10] = z[2];
+  m[12] = -dot(x, eye);
+  m[13] = -dot(y, eye);
+  m[14] = -dot(z, eye);
+  m[15] = 1;
+  return m;
+}
+
+function multiply(a: Float32Array, b: Float32Array) {
+  const o = new Float32Array(16);
+  for (let c = 0; c < 4; c += 1) {
+    for (let r = 0; r < 4; r += 1) {
+      o[c * 4 + r] =
+        a[r] * b[c * 4] +
+        a[4 + r] * b[c * 4 + 1] +
+        a[8 + r] * b[c * 4 + 2] +
+        a[12 + r] * b[c * 4 + 3];
+    }
+  }
+  return o;
+}
+
+function cross(a: number[], b: number[]) {
+  return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+}
+
+function dot(a: number[], b: number[]) {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+const grassVertex = `
+attribute vec3 aPos;
+attribute float aTip;
+attribute vec3 aTint;
+uniform mat4 uViewProj;
+uniform float uTime;
+varying float vTip;
+varying vec3 vTint;
+void main() {
+  vTip = aTip;
+  vTint = aTint;
+  float depth = clamp((1.5 - aPos.z) / 8.2, 0.0, 1.0);
+  float scale = 1.0 - depth * 0.74;
+  float flex = smoothstep(0.0, 0.28, aTip);
+  float phase = aPos.x * 0.68 + aPos.z * 0.34;
+  float wave = sin(phase - uTime * 2.5) - sin(phase);
+  float local = aPos.x * 5.2 + aPos.z * 3.6;
+  float flutter = sin(local + uTime * 5.1) - sin(local);
+  float bend = (wave * 0.78 + flutter * 0.22) * flex * scale * 0.0072;
+  vec3 pos = aPos;
+  pos.x += bend * 0.9;
+  pos.z += bend * 0.34;
+  pos.y -= bend * bend * 14.0;
+  gl_Position = uViewProj * vec4(pos, 1.0);
+}
+`;
+
+const grassFragment = `
+precision highp float;
+varying float vTip;
+varying vec3 vTint;
+vec3 srgb(vec3 c) { return pow(max(c, 0.0), vec3(0.4545)); }
+void main() {
+  vec3 base = vec3(0.07, 0.22, 0.05);
+  vec3 color = mix(base, vTint, smoothstep(0.15, 1.0, vTip));
+  gl_FragColor = vec4(srgb(color), 1.0);
+}
+`;
+
+function terrainHeight(x: number, z: number) {
+  const far = Math.min(1, Math.max(0, (2.4 - z) / 10));
+  const dx = (x + 4.8) * 0.24;
+  const dz = (z + 5.2) * 0.3;
+  let hill = Math.exp(-(dx * dx + dz * dz)) * 1.05;
+  const grow = Math.min(1, Math.max(0, (far - 0.12) / 0.66));
+  hill *= grow * grow * (3 - 2 * grow);
+  const side = Math.min(1, Math.max(0, (x + 0.6) / 4.8));
+  const shaped = side * side * (3 - 2 * side);
+  hill *= 1 - shaped * 0.55;
+  return hill + Math.sin(x * 0.22) * 0.03 + Math.sin(z * 0.18) * 0.02 + 0.012;
+}
+
+function buildGrass() {
+  const tufts = 288000;
+  const flowers = 11500;
+  const verts = tufts * 6 + flowers * 18;
+  const data = new Float32Array(verts * 7);
+  let t = 11;
+  const rnd = () => {
     t += 0x6d2b79f5;
     let n = Math.imul(t ^ (t >>> 15), 1 | t);
     n ^= n + Math.imul(n ^ (n >>> 7), 61 | n);
     return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-function hash32(x: number, y: number, seed: number) {
-  let n =
-    Math.imul(x | 0, 374761393) ^
-    Math.imul(y | 0, 668265263) ^
-    Math.imul(seed | 0, 1442695041);
-  n = Math.imul(n ^ (n >>> 13), 1274126177);
-  return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
-}
-
-function fade(t: number) {
-  return t * t * t * (t * (t * 6 - 15) + 10);
-}
-
-function valueNoise(x: number, y: number, seed: number) {
-  const x0 = Math.floor(x);
-  const y0 = Math.floor(y);
-  const fx = fade(x - x0);
-  const fy = fade(y - y0);
-  const a = hash32(x0, y0, seed);
-  const b = hash32(x0 + 1, y0, seed);
-  const c = hash32(x0, y0 + 1, seed);
-  const d = hash32(x0 + 1, y0 + 1, seed);
-  return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
-}
-
-function fbm(x: number, y: number, seed: number, octaves = 4) {
-  let value = 0;
-  let amp = 0.5;
-  let freq = 1;
-  let norm = 0;
-  for (let i = 0; i < octaves; i += 1) {
-    value += valueNoise(x * freq, y * freq, seed + i * 19) * amp;
-    norm += amp;
-    amp *= 0.5;
-    freq *= 2.02;
-  }
-  return value / norm;
-}
-
-function mixPalette(t: number) {
-  const x = Math.min(1, Math.max(0, t));
-  let i = 0;
-  while (i < grassPalette.length - 2 && x > grassPalette[i + 1].t) i += 1;
-  const a = grassPalette[i];
-  const b = grassPalette[i + 1];
-  const u = (x - a.t) / (b.t - a.t || 1);
-  return {
-    r: a.r + (b.r - a.r) * u,
-    g: a.g + (b.g - a.g) * u,
-    b: a.b + (b.b - a.b) * u,
+  let cursor = 0;
+  const write = (x: number, y: number, z: number, tip: number, tint: number[]) => {
+    data[cursor++] = x;
+    data[cursor++] = y;
+    data[cursor++] = z;
+    data[cursor++] = tip;
+    data[cursor++] = tint[0];
+    data[cursor++] = tint[1];
+    data[cursor++] = tint[2];
   };
-}
+  const greens = [
+    [0.3, 0.48, 0.11],
+    [0.4, 0.58, 0.14],
+    [0.24, 0.42, 0.09],
+  ];
+  const petals = [
+    [0.96, 0.84, 0.28],
+    [0.97, 0.97, 0.93],
+    [0.9, 0.48, 0.62],
+    [0.62, 0.48, 0.86],
+  ];
+  const center = [0.98, 0.82, 0.22];
+  const stem = [0.28, 0.46, 0.1];
 
-function makeCanvas(width: number, height: number) {
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(width));
-  canvas.height = Math.max(1, Math.round(height));
-  const ctx = canvas.getContext("2d", { alpha: true });
-  if (!ctx) throw new Error("Canvas 2D is not available");
-  return { canvas, ctx };
-}
+  const place = () => {
+    const farBand = rnd() < 0.34;
+    const z = farBand ? -1.1 - rnd() * 6.4 : 1.4 - Math.pow(rnd(), 1.35) * 5.2;
+    const spread = farBand ? 6.2 + (-1.1 - z) * 0.45 : 4.2 + (1.4 - z) * 1.15;
+    const x = (rnd() - 0.5) * spread * 2;
+    return { x, z, y: terrainHeight(x, z), farBand };
+  };
 
-function cubic(p0: number, p1: number, p2: number, p3: number, t: number) {
-  const u = 1 - t;
-  return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
-}
-
-function buildHillTop(w: number, h: number) {
-  const { leftY, crestX, crestY, rightY } = introLandscape;
-  const top = new Float32Array(w);
-  top.fill(h);
-  const segs = [
-    [
-      [0, leftY],
-      [0.13, leftY - 0.018],
-      [crestX - 0.1, crestY + 0.004],
-      [crestX, crestY],
-    ],
-    [
-      [crestX, crestY],
-      [crestX + 0.18, crestY + 0.006],
-      [0.74, rightY - 0.012],
-      [1, rightY],
-    ],
-  ] as const;
-
-  for (const [p0, p1, p2, p3] of segs) {
-    for (let i = 0; i <= 2400; i += 1) {
-      const t = i / 2400;
-      const x = Math.round(cubic(p0[0], p1[0], p2[0], p3[0], t) * (w - 1));
-      const y = cubic(p0[1], p1[1], p2[1], p3[1], t) * h;
-      if (x >= 0 && x < w && y < top[x]) top[x] = y;
+  for (let i = 0; i < tufts; i += 1) {
+    const { x, y, z } = place();
+    const depth = Math.min(1, Math.max(0, (1.5 - z) / 8.2));
+    const scale = 1 - depth * 0.74;
+    const height = (0.03 + rnd() * 0.042) * scale;
+    const width = (0.0042 + rnd() * 0.0032) * scale;
+    const yaw = rnd() * Math.PI;
+    const lean = (rnd() - 0.5) * 0.1 * scale;
+    const tint = greens[Math.floor(rnd() * greens.length)];
+    const tipX = x + Math.cos(yaw) * lean;
+    const tipZ = z + Math.sin(yaw) * lean;
+    for (let card = 0; card < 2; card += 1) {
+      const angle = yaw + card * Math.PI * 0.5;
+      const ox = Math.cos(angle) * width;
+      const oz = Math.sin(angle) * width;
+      write(x - ox, y, z - oz, 0, tint);
+      write(x + ox, y, z + oz, 0, tint);
+      write(tipX, y + height, tipZ, 1, tint);
     }
   }
 
-  for (let x = 1; x < w; x += 1) {
-    if (top[x] === h) top[x] = top[x - 1];
-  }
-  for (let x = w - 2; x >= 0; x -= 1) {
-    if (top[x] === h) top[x] = top[x + 1];
-  }
-  return top;
-}
-
-function drawSky(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  const vertical = ctx.createLinearGradient(0, 0, 0, h * 0.64);
-  vertical.addColorStop(0, introLandscape.skyTop);
-  vertical.addColorStop(0.22, introLandscape.skyUpper);
-  vertical.addColorStop(0.5, introLandscape.skyMid);
-  vertical.addColorStop(0.82, introLandscape.skyLower);
-  vertical.addColorStop(1, introLandscape.skyHorizon);
-  ctx.fillStyle = vertical;
-  ctx.fillRect(0, 0, w, h);
-
-  const side = ctx.createLinearGradient(0, 0, w, 0);
-  side.addColorStop(0, "rgba(255,255,255,0.06)");
-  side.addColorStop(0.4, "rgba(255,255,255,0)");
-  side.addColorStop(1, "rgba(8,48,150,0.05)");
-  ctx.fillStyle = side;
-  ctx.fillRect(0, 0, w, h * 0.64);
-}
-
-function paintDensityField(
-  width: number,
-  height: number,
-  densityAt: (x: number, y: number) => number,
-  lightAt: (x: number, y: number, density: number) => number,
-) {
-  const { canvas, ctx } = makeCanvas(width, height);
-  const image = ctx.createImageData(width, height);
-  const { data } = image;
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const density = densityAt(x, y);
-      if (density <= 0) continue;
-      const light = lightAt(x, y, density);
-      const i = (y * width + x) * 4;
-      data[i] = 255;
-      data[i + 1] = 255 - (1 - light) * 12;
-      data[i + 2] = 255 - (1 - light) * 36;
-      data[i + 3] = Math.round(Math.min(1, density) * 255);
-    }
-  }
-  ctx.putImageData(image, 0, 0);
-  return canvas;
-}
-
-function drawCumulus(
-  ctx: CanvasRenderingContext2D,
-  rng: Rng,
-  cx: number,
-  cy: number,
-  scale: number,
-  kind: "full" | "broken" | "wispy",
-) {
-  const lobes = 5 + Math.floor(rng() * (kind === "wispy" ? 3 : 7));
-  const specs = Array.from({ length: lobes }, () => ({
-    x: (rng() - 0.5) * scale * (kind === "broken" ? 1.8 : 1.35),
-    y: (rng() - 0.62) * scale * (kind === "wispy" ? 0.28 : 0.48),
-    rx: scale * (0.18 + rng() * (kind === "wispy" ? 0.28 : 0.42)),
-    ry: scale * (0.1 + rng() * (kind === "wispy" ? 0.12 : 0.22)),
-    w: 0.55 + rng() * 0.7,
-  }));
-  const width = Math.ceil(scale * 3.2);
-  const height = Math.ceil(scale * 1.7);
-  const seed = Math.floor(rng() * 1000);
-  const threshold = kind === "wispy" ? 0.42 : 0.5;
-  const cloud = paintDensityField(
-    width,
-    height,
-    (x, y) => {
-      const lx = x - width / 2;
-      const ly = y - height / 2;
-      let density = 0;
-      for (const lobe of specs) {
-        const dx = (lx - lobe.x) / lobe.rx;
-        const dy = (ly - lobe.y) / lobe.ry;
-        const r2 = dx * dx + dy * dy;
-        if (r2 < 2.1) density += lobe.w * (1 - r2 / 2.1) ** 2;
-      }
-      const n = fbm(x / (scale * 0.22), y / (scale * 0.16), seed, 4);
-      density *= 0.62 + n * 0.7;
-      if (kind === "broken" && n < 0.38) density *= 0.35;
-      return Math.max(0, (density - threshold) * 1.55);
-    },
-    (x, y) => {
-      const nx = 0.5 - x / width;
-      const ny = 0.55 - y / height;
-      return Math.min(1, Math.max(0.35, 0.62 + ny * 0.5 + nx * 0.18));
-    },
-  );
-  ctx.drawImage(cloud, cx - width / 2, cy - height / 2);
-}
-
-function drawCirrusBand(
-  ctx: CanvasRenderingContext2D,
-  rng: Rng,
-  x: number,
-  y: number,
-  length: number,
-  thickness: number,
-) {
-  const width = Math.ceil(length);
-  const height = Math.ceil(thickness * 3.2);
-  const seed = Math.floor(rng() * 800);
-  const tilt = -0.2 + rng() * 0.12;
-  const band = paintDensityField(
-    width,
-    height,
-    (px, py) => {
-      const u = px / width;
-      const v = (py - height / 2) / thickness;
-      const warp = fbm(u * 3.2, py / 10, seed, 4);
-      const filament = fbm(u * 7 + warp * 2.4, v * 1.6, seed + 4, 4);
-      const envelope = Math.exp(-((v - (warp - 0.5) * 0.8) ** 2) * 1.6);
-      const gaps = filament > 0.5 ? filament : 0;
-      return Math.max(0, (gaps - 0.5) * envelope * 1.45);
-    },
-    () => 0.92,
-  );
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(tilt);
-  ctx.globalAlpha = 0.78;
-  ctx.drawImage(band, 0, -height / 2);
-  ctx.restore();
-}
-
-function paintCloudLayer(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
-  layer: "far" | "mid" | "near",
-) {
-  if (layer === "far") {
-    const rng = mulberry32(811);
-    drawCirrusBand(ctx, rng, w * 0.24, h * 0.068, w * 0.36, h * 0.013);
-    drawCirrusBand(ctx, rng, w * 0.44, h * 0.105, w * 0.26, h * 0.01);
-    drawCirrusBand(ctx, rng, w * 0.62, h * 0.048, w * 0.2, h * 0.009);
-    drawCumulus(ctx, rng, w * 0.2, h * 0.4, w * 0.028, "wispy");
-    drawCumulus(ctx, rng, w * 0.41, h * 0.43, w * 0.02, "wispy");
-    drawCumulus(ctx, rng, w * 0.68, h * 0.415, w * 0.022, "broken");
-    return;
-  }
-
-  if (layer === "mid") {
-    const rng = mulberry32(1409);
-    drawCumulus(ctx, rng, w * 0.04, h * 0.07, w * 0.07, "broken");
-    drawCumulus(ctx, rng, w * 0.16, h * 0.045, w * 0.038, "wispy");
-    drawCumulus(ctx, rng, w * 0.34, h * 0.195, w * 0.032, "broken");
-    drawCumulus(ctx, rng, w * 0.54, h * 0.28, w * 0.07, "full");
-    drawCirrusBand(ctx, rng, w * 0.3, h * 0.13, w * 0.22, h * 0.012);
-    return;
-  }
-
-  const rng = mulberry32(2207);
-  drawCumulus(ctx, rng, w * 0.8, h * 0.21, w * 0.09, "full");
-  drawCumulus(ctx, rng, w * 0.93, h * 0.11, w * 0.055, "broken");
-  drawCumulus(ctx, rng, w * 0.88, h * 0.3, w * 0.03, "wispy");
-  drawCumulus(ctx, rng, w * 0.07, h * 0.15, w * 0.04, "broken");
-}
-
-function renderLand(w: number, h: number) {
-  const { canvas, ctx } = makeCanvas(w, h);
-  const top = buildHillTop(w, h);
-  const image = ctx.createImageData(w, h);
-  const { data } = image;
-
-  for (let x = 0; x < w; x += 1) {
-    const ridge = top[x];
-    const slope =
-      (top[Math.min(w - 1, x + 3)] - top[Math.max(0, x - 3)]) / 6 / h;
-    const u = x / w;
-
-    for (let y = Math.max(0, Math.floor(ridge) - 1); y < h; y += 1) {
-      const edge = ridge - y;
-      if (edge > 1) continue;
-
-      const v = y / h;
-      const span = h - ridge;
-      const depth = span > 1 ? (y - ridge) / span : 1;
-      const nBroad = fbm(u * 1.7, v * 1.25, 3, 5);
-      const nMid = fbm(u * 4.8 + nBroad * 0.35, v * 3.6, 11, 4);
-      const nFine = fbm(u * 22, v * 14 + u * 3, 29, 3);
-      const nGrain = fbm(u * 64, v * 36 + u * 8, 47, 2);
-
-      let light = 0.62;
-      light += (1 - depth) * 0.22;
-      light -= depth * 0.3;
-      light -= u * 0.1;
-      light += (1 - u) * (1 - depth) * 0.16;
-      light -= slope * 1.8;
-      light += (nBroad - 0.5) * 0.2;
-      light += (nMid - 0.5) * 0.11;
-      light += (nFine - 0.5) * (0.05 + depth * 0.06);
-      light += (nGrain - 0.5) * (0.028 + depth * 0.055);
-
-      const contour = Math.sin(
-        (y - ridge) * (0.045 + depth * 0.05) + nMid * 5.5,
+  for (let i = 0; i < flowers; i += 1) {
+    const { x, y, z } = place();
+    const depth = Math.min(1, Math.max(0, (1.5 - z) / 8.2));
+    const scale = 1 - depth * 0.74;
+    const height = (0.022 + rnd() * 0.026) * scale;
+    const bloom = height * 0.38;
+    const stemHalf = 0.002 * scale;
+    const petal = petals[Math.floor(rnd() * petals.length)];
+    const yaw = rnd() * Math.PI * 2;
+    write(x - stemHalf, y, z, 0, stem);
+    write(x + stemHalf, y, z, 0, stem);
+    write(x, y + height, z, 0.35, stem);
+    const headY = y + height;
+    const lift = 0.0025 * scale;
+    for (let p = 0; p < 5; p += 1) {
+      const a0 = yaw + (p / 5) * Math.PI * 2;
+      const a1 = yaw + ((p + 0.72) / 5) * Math.PI * 2;
+      write(x, headY + lift, z, 1, center);
+      write(
+        x + Math.cos(a0) * bloom,
+        headY + lift,
+        z + Math.sin(a0) * bloom * 0.72,
+        1,
+        petal,
       );
-      light += contour * (0.012 + depth * 0.018);
-
-      const color = mixPalette(light);
-      let { r, g, b } = color;
-
-      const bloom = hash32(x, y, 77);
-      const flowerChance = Math.max(0, depth - 0.38) ** 2 * 0.014;
-      if (bloom < flowerChance) {
-        const warmth = bloom / Math.max(flowerChance, 1e-6);
-        r = r * 0.45 + (210 + warmth * 30) * 0.55;
-        g = g * 0.45 + (190 + warmth * 20) * 0.55;
-        b = b * 0.55 + 70 * 0.45;
-      }
-
-      const i = (y * w + x) * 4;
-      data[i] = r;
-      data[i + 1] = g;
-      data[i + 2] = b;
-      data[i + 3] = edge > 0 ? Math.round((1 - edge) * 255) : 255;
+      write(
+        x + Math.cos(a1) * bloom,
+        headY + lift,
+        z + Math.sin(a1) * bloom * 0.72,
+        1,
+        petal,
+      );
     }
   }
 
-  ctx.putImageData(image, 0, 0);
-  return canvas;
+  return { data, count: verts };
 }
 
-function drawClouds(
-  ctx: CanvasRenderingContext2D,
-  layer: HTMLCanvasElement,
-  offset: number,
-  w: number,
-) {
-  const x = -((offset % w) + w) % w;
-  ctx.drawImage(layer, x, 0);
-  ctx.drawImage(layer, x + w, 0);
+function normalize(v: number[]) {
+  const length = Math.hypot(v[0], v[1], v[2]) || 1;
+  return [v[0] / length, v[1] / length, v[2] / length];
 }
 
 export function IntroDesktopBackground() {
@@ -382,44 +458,134 @@ export function IntroDesktopBackground() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const view = canvas.getContext("2d", { alpha: false });
-    if (!view) return;
+    const gl = canvas.getContext("webgl", {
+      alpha: false,
+      antialias: true,
+      depth: true,
+    });
+    if (!gl) return;
+
+    let sky: WebGLProgram | null = null;
+    let land: WebGLProgram | null = null;
+    let grass: WebGLProgram | null = null;
+    try {
+      sky = program(gl, skyVertex, skyFragment);
+      land = program(gl, landVertex, landFragment);
+      grass = program(gl, grassVertex, grassFragment);
+    } catch (error) {
+      console.error(error);
+    }
+    if (!sky || !land) return;
+    const skyTime = gl.getUniformLocation(sky, "uTime");
+    const landTime = gl.getUniformLocation(land, "uTime");
+    const viewProj = gl.getUniformLocation(land, "uViewProj");
+    const grassView = grass ? gl.getUniformLocation(grass, "uViewProj") : null;
+    const grassTime = grass ? gl.getUniformLocation(grass, "uTime") : null;
+
+    const clip = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, clip);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+
+    const cols = 240;
+    const rows = 160;
+    const grid = new Float32Array(cols * rows * 2);
+    for (let z = 0; z < rows; z += 1) {
+      for (let x = 0; x < cols; x += 1) {
+        const i = (z * cols + x) * 2;
+        grid[i] = x / (cols - 1);
+        grid[i + 1] = z / (rows - 1);
+      }
+    }
+    const indices = new Uint16Array((cols - 1) * (rows - 1) * 6);
+    let offset = 0;
+    for (let z = 0; z < rows - 1; z += 1) {
+      for (let x = 0; x < cols - 1; x += 1) {
+        const a = z * cols + x;
+        indices[offset++] = a;
+        indices[offset++] = a + cols;
+        indices[offset++] = a + 1;
+        indices[offset++] = a + 1;
+        indices[offset++] = a + cols;
+        indices[offset++] = a + cols + 1;
+      }
+    }
+    const gridBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, grid, gl.STATIC_DRAW);
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+    const blades = buildGrass();
+    const grassBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, grassBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, blades.data, gl.STATIC_DRAW);
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let far: HTMLCanvasElement | null = null;
-    let mid: HTMLCanvasElement | null = null;
-    let near: HTMLCanvasElement | null = null;
-    let land: HTMLCanvasElement | null = null;
-    let sky: HTMLCanvasElement | null = null;
+    let raf = 0;
+    let start = performance.now();
     let width = 0;
     let height = 0;
-    let raf = 0;
-    let last = performance.now();
-    let farX = 0;
-    let midX = 0;
-    let nearX = 0;
 
-    const paint = (now: number) => {
-      const dt = Math.min(48, now - last) / 1000;
-      last = now;
-      if (!reduce && width) {
-        farX += introLandscape.cloudFarSpeed * dt;
-        midX += introLandscape.cloudMidSpeed * dt;
-        nearX += introLandscape.cloudNearSpeed * dt;
+    const draw = (now: number) => {
+      const time = reduce ? 0 : (now - start) / 1000;
+      const sway = reduce ? 0 : Math.sin(time * 0.22) * 0.045;
+      const aspect = width / Math.max(1, height);
+      const proj = perspective((48 * Math.PI) / 180, aspect, 0.05, 40);
+      const view = lookAt(
+        [0.25 + sway, 0.78, 1.7],
+        [-2.15, 0.5, -4.8],
+        [0, 1, 0],
+      );
+      gl.viewport(0, 0, width, height);
+      gl.disable(gl.DEPTH_TEST);
+      gl.useProgram(sky);
+      gl.uniform1f(skyTime, time);
+      gl.bindBuffer(gl.ARRAY_BUFFER, clip);
+      const skyPos = gl.getAttribLocation(sky, "aClip");
+      gl.enableVertexAttribArray(skyPos);
+      gl.vertexAttribPointer(skyPos, 2, gl.FLOAT, false, 0, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      gl.enable(gl.DEPTH_TEST);
+      gl.clear(gl.DEPTH_BUFFER_BIT);
+      gl.useProgram(land);
+      gl.uniform1f(landTime, time);
+      gl.uniformMatrix4fv(viewProj, false, multiply(proj, view));
+      gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
+      const landPos = gl.getAttribLocation(land, "aUv");
+      gl.enableVertexAttribArray(landPos);
+      gl.vertexAttribPointer(landPos, 2, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+      gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+      if (grass && grassView) {
+        gl.useProgram(grass);
+        gl.uniformMatrix4fv(grassView, false, multiply(proj, view));
+        if (grassTime) gl.uniform1f(grassTime, time);
+        gl.bindBuffer(gl.ARRAY_BUFFER, grassBuffer);
+        const stride = 7 * 4;
+        const pos = gl.getAttribLocation(grass, "aPos");
+        const tip = gl.getAttribLocation(grass, "aTip");
+        const tint = gl.getAttribLocation(grass, "aTint");
+        gl.enableVertexAttribArray(pos);
+        gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, stride, 0);
+        gl.enableVertexAttribArray(tip);
+        gl.vertexAttribPointer(tip, 1, gl.FLOAT, false, stride, 12);
+        gl.enableVertexAttribArray(tint);
+        gl.vertexAttribPointer(tint, 3, gl.FLOAT, false, stride, 16);
+        gl.drawArrays(gl.TRIANGLES, 0, blades.count);
       }
-      if (sky && land && far && mid && near) {
-        view.drawImage(sky, 0, 0);
-        drawClouds(view, far, farX, width);
-        drawClouds(view, mid, midX, width);
-        drawClouds(view, near, nearX, width);
-        view.drawImage(land, 0, 0);
-      }
-      if (!reduce) raf = requestAnimationFrame(paint);
     };
 
-    const rebuild = () => {
+    const frame = (now: number) => {
+      draw(now);
+      raf = requestAnimationFrame(frame);
+    };
+
+    const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const nextW = Math.max(1, Math.round(rect.width * dpr));
       const nextH = Math.max(1, Math.round(rect.height * dpr));
       if (nextW === width && nextH === height) return;
@@ -427,47 +593,31 @@ export function IntroDesktopBackground() {
       height = nextH;
       canvas.width = width;
       canvas.height = height;
-
-      const skyLayer = makeCanvas(width, height);
-      drawSky(skyLayer.ctx, width, height);
-      sky = skyLayer.canvas;
-
-      const farLayer = makeCanvas(width, height);
-      paintCloudLayer(farLayer.ctx, width, height, "far");
-      far = farLayer.canvas;
-
-      const midLayer = makeCanvas(width, height);
-      paintCloudLayer(midLayer.ctx, width, height, "mid");
-      mid = midLayer.canvas;
-
-      const nearLayer = makeCanvas(width, height);
-      paintCloudLayer(nearLayer.ctx, width, height, "near");
-      near = nearLayer.canvas;
-
-      land = renderLand(width, height);
-
-      view.drawImage(sky, 0, 0);
-      drawClouds(view, far, farX, width);
-      drawClouds(view, mid, midX, width);
-      drawClouds(view, near, nearX, width);
-      view.drawImage(land, 0, 0);
+      draw(performance.now());
     };
 
-    rebuild();
-    const observer = new ResizeObserver(rebuild);
+    resize();
+    const observer = new ResizeObserver(resize);
     observer.observe(canvas.parentElement ?? canvas);
-    if (!reduce) raf = requestAnimationFrame(paint);
+    if (!reduce) raf = requestAnimationFrame(frame);
 
     return () => {
       observer.disconnect();
       cancelAnimationFrame(raf);
+      gl.deleteProgram(sky);
+      gl.deleteProgram(land);
+      if (grass) gl.deleteProgram(grass);
+      gl.deleteBuffer(clip);
+      gl.deleteBuffer(gridBuffer);
+      gl.deleteBuffer(indexBuffer);
+      gl.deleteBuffer(grassBuffer);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="intro-desktop-bg absolute inset-0 h-full w-full"
+      className="intro-desktop-bg absolute inset-0 h-full w-full bg-[#328af0]"
       aria-hidden
     />
   );
