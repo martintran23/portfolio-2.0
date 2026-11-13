@@ -153,9 +153,9 @@ revenuetwin/
 
 ### 2. WeCalendar
 
-- **Tags:** Next.js, React, TypeScript, Tailwind, Supabase, PostgreSQL, RLS, Realtime, TipTap, Vitest, Vercel, GitHub Actions
+- **Tags:** Next.js, React, TypeScript, Supabase, Postgres, RLS, Realtime, TipTap, Leaflet, Vitest, GitHub Actions, Vercel
 - **Affiliation:** Personal Project · Aug 2026
-- **Pitch:** Shared calendar and notes for invite-code workspaces, with realtime sync, conflict-aware scheduling, and a full collaborative Notes system.
+- **Pitch:** Shared calendar, notes, and map for invite-code workspaces, with realtime sync, RSVPs, in-app notifications, and ICS import.
 - **GitHub:** https://github.com/martintran23/WeCalendar
 - **Alternate org (resume only, not default):** https://github.com/WeCalendar1/WeCalendar
 - **Live:** https://we-calendar.vercel.app
@@ -163,36 +163,44 @@ revenuetwin/
 #### Case study
 
 **Problem**  
-Shared schedules and lists get stuck in texts and screenshots; groups need one workspace for events, conflicts, and collaborative notes.
+Shared schedules and lists get stuck in texts and screenshots; groups need one workspace for events, conflicts, places, and collaborative notes.
 
 **What was built**
 
-- Next.js App Router frontend + Supabase (Auth, Postgres, RLS, Realtime).
-- Workspace model with invite codes; events/notes scoped by `group_id`.
-- Notes module: TipTap editor, folders, private vs shared, event linking, soft-delete trash, sorting, drag-and-drop.
-- Deploy: Vercel + Supabase. CI: typecheck, lint, unit tests, production build.
+- Next.js App Router + Supabase (Auth, Postgres, RLS, Realtime, Storage for avatars).
+- Invite-code workspaces; day/week/month/year calendar; UI conflict highlighting; event tags.
+- TipTap Notes (folders, private/shared, event and place linking, trash, sort, drag-and-drop).
+- Shared Map pins linked to events/notes, geolocation, nearby place search.
+- Going / Maybe / Declined RSVPs; notification bell and availability nudges.
+- One-way ICS subscribe, upload, and export with SSRF-safe fetch (not OAuth).
+- Account leave / export / delete; Vercel + GitHub Actions (typecheck, lint, 184 unit tests, production build).
 
 **Role**
 
-- End-to-end ownership: frontend, schema/migrations, auth, realtime, CI/CD, Notes replacement for Tasks.
-- Postgres schema + RLS across ~10 tables, invite RPCs, 9 SQL migrations; realtime across ~7 tables; conflict UX; TipTap Notes with shared/private RLS.
+- End-to-end ownership of product, schema, RLS, and UI.
+- 14 public tables, 20 SQL migrations; Realtime on 11 tables, app subscribed to 9.
+- Replaced the old exclusive-time write reject with overlap-tolerant conflict UX.
+- Notes is the writing surface; lists tables remain but have no product UI.
+- Map, RSVP, notifications, and ICS sync designed and shipped as later phases.
 
 **Outcome**
 
-- Working multi-user shared calendar + notes product with live deploy.
-- Vitest + GitHub Actions on a small engineering cadence.
+- Live multi-user shared calendar, notes, and map product.
+- CI runs typecheck, lint, Vitest (14 files / 184 tests), and a production build on every PR.
 
 #### Narrative file tree
 
 ```
 wecalendar/
 ├── architecture.md          # AppShell, workspace invites, Supabase clients
-├── supabase/migrations/     # RLS, notes, trash, recurrence, idempotent SQL
+├── supabase/migrations/     # RLS, places, RSVPs, notifications, ICS sync
 ├── notes/
 │   ├── editor.tsx           # TipTap + debounced autosave
 │   └── folders.ts           # Shared/private folders, DnD, trash
-├── calendar/                # Month/week/day/year + conflict UX
-└── what-id-redo.md          # Usage learning, rate-aware scheduling (future)
+├── calendar/                # Month/week/day/year + conflict UX + RSVPs
+├── map/                     # Leaflet pins, geolocation, place search
+├── notifications/           # Bell, prefs, availability nudges
+└── ics/                     # Subscribe, upload, export (SSRF-safe fetch)
 ```
 
 ### 3. WattTime (repo: ZotWatt)
