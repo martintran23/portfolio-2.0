@@ -150,7 +150,11 @@ body {
 }
 
 .intro-desktop-bg {
-  animation: intro-desktop-fade 700ms ease both;
+  opacity: 0;
+}
+
+.intro-desktop-bg.is-ready {
+  animation: intro-desktop-fade 500ms ease both;
 }
 
 @keyframes intro-desktop-fade {
@@ -200,9 +204,14 @@ body {
   .intro-boot-bar,
   .intro-boot-name,
   .intro-desktop-bg,
+  .intro-desktop-bg.is-ready,
   .intro-cursor-move,
   .intro-cursor-click {
     animation: none;
+  }
+
+  .intro-desktop-bg.is-ready {
+    opacity: 1;
   }
 
   .intro-boot-line,
