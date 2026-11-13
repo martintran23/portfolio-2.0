@@ -47,7 +47,7 @@ export const listedRepos: ListedRepo[] = [
   {
     name: "WeCalendar",
     description:
-      "Shared calendar and notes for invite-code workspaces, with realtime sync, conflict-aware scheduling, and a full collaborative Notes system.",
+      "Shared calendar, notes, and map for invite-code workspaces, with realtime sync, RSVPs, in-app notifications, and ICS import.",
     language: "TypeScript",
     stars: 0,
     href: "/work/wecalendar",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const skyVertex = `
 attribute vec2 aClip;
@@ -344,7 +344,18 @@ function terrainHeight(x: number, z: number) {
   return hill + Math.sin(x * 0.22) * 0.03 + Math.sin(z * 0.18) * 0.02 + 0.012;
 }
 
-function buildGrass() {
+type GrassMesh = { data: Float32Array; count: number };
+
+let grassCache: GrassMesh | null = null;
+let grassBuild: Promise<GrassMesh> | null = null;
+
+function yieldFrame() {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
+async function buildGrassAsync(): Promise<GrassMesh> {
   const tufts = 288000;
   const flowers = 11500;
   const verts = tufts * 6 + flowers * 18;
@@ -388,6 +399,7 @@ function buildGrass() {
     return { x, z, y: terrainHeight(x, z), farBand };
   };
 
+  const batch = 24000;
   for (let i = 0; i < tufts; i += 1) {
     const { x, y, z } = place();
     const depth = Math.min(1, Math.max(0, (1.5 - z) / 8.2));
@@ -407,6 +419,7 @@ function buildGrass() {
       write(x + ox, y, z + oz, 0, tint);
       write(tipX, y + height, tipZ, 1, tint);
     }
+    if (i > 0 && i % batch === 0) await yieldFrame();
   }
 
   for (let i = 0; i < flowers; i += 1) {
@@ -442,9 +455,20 @@ function buildGrass() {
         petal,
       );
     }
+    if (i > 0 && i % 2000 === 0) await yieldFrame();
   }
 
   return { data, count: verts };
+}
+
+export function prefetchIntroGrass() {
+  if (grassCache) return Promise.resolve(grassCache);
+  if (grassBuild) return grassBuild;
+  grassBuild = buildGrassAsync().then((mesh) => {
+    grassCache = mesh;
+    return mesh;
+  });
+  return grassBuild;
 }
 
 function normalize(v: number[]) {
@@ -454,6 +478,7 @@ function normalize(v: number[]) {
 
 export function IntroDesktopBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -516,18 +541,17 @@ export function IntroDesktopBackground() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-    const blades = buildGrass();
-    const grassBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, grassBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, blades.data, gl.STATIC_DRAW);
-
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
     let start = performance.now();
     let width = 0;
     let height = 0;
+    let blades: GrassMesh | null = null;
+    let grassBuffer: WebGLBuffer | null = null;
+    let cancelled = false;
 
     const draw = (now: number) => {
+      if (!width || !height) return;
       const time = reduce ? 0 : (now - start) / 1000;
       const sway = reduce ? 0 : Math.sin(time * 0.22) * 0.045;
       const aspect = width / Math.max(1, height);
@@ -559,7 +583,7 @@ export function IntroDesktopBackground() {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
       gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
-      if (grass && grassView) {
+      if (grass && grassView && grassBuffer && blades) {
         gl.useProgram(grass);
         gl.uniformMatrix4fv(grassView, false, multiply(proj, view));
         if (grassTime) gl.uniform1f(grassTime, time);
@@ -593,15 +617,27 @@ export function IntroDesktopBackground() {
       height = nextH;
       canvas.width = width;
       canvas.height = height;
-      draw(performance.now());
+      if (blades) draw(performance.now());
     };
 
-    resize();
     const observer = new ResizeObserver(resize);
     observer.observe(canvas.parentElement ?? canvas);
-    if (!reduce) raf = requestAnimationFrame(frame);
+    resize();
+
+    prefetchIntroGrass().then((mesh) => {
+      if (cancelled) return;
+      blades = mesh;
+      grassBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, grassBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, blades.data, gl.STATIC_DRAW);
+      start = performance.now();
+      draw(start);
+      setReady(true);
+      if (!reduce) raf = requestAnimationFrame(frame);
+    });
 
     return () => {
+      cancelled = true;
       observer.disconnect();
       cancelAnimationFrame(raf);
       gl.deleteProgram(sky);
@@ -610,14 +646,14 @@ export function IntroDesktopBackground() {
       gl.deleteBuffer(clip);
       gl.deleteBuffer(gridBuffer);
       gl.deleteBuffer(indexBuffer);
-      gl.deleteBuffer(grassBuffer);
+      if (grassBuffer) gl.deleteBuffer(grassBuffer);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="intro-desktop-bg absolute inset-0 h-full w-full bg-[#328af0]"
+      className={`intro-desktop-bg absolute inset-0 h-full w-full ${ready ? "is-ready" : ""}`}
       aria-hidden
     />
   );

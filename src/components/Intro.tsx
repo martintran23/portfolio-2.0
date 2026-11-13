@@ -7,7 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { IntroDesktopBackground } from "./IntroDesktopBackground";
+import {
+  IntroDesktopBackground,
+  prefetchIntroGrass,
+} from "./IntroDesktopBackground";
 
 const storageKey = "mt-intro-seen";
 
@@ -31,6 +34,7 @@ export function Intro({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (phase !== "boot") return;
+    prefetchIntroGrass();
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timer = window.setTimeout(() => setPhase("desktop"), reduce ? 700 : 2400);
     return () => window.clearTimeout(timer);
@@ -131,7 +135,7 @@ function Desktop({ onOpen }: { onOpen: () => void }) {
   }, [onOpen]);
 
   return (
-    <div className="relative h-full cursor-none">
+    <div className="relative h-full cursor-none bg-black">
       <IntroDesktopBackground />
       <button
         ref={folderRef}

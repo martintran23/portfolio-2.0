@@ -87,7 +87,7 @@ export const profile = {
     {
       name: "WeCalendar",
       href: "/work/wecalendar",
-      pitch: "Shared calendar and notes with realtime sync.",
+      pitch: "Shared calendar, notes, and map with realtime sync.",
     },
     {
       name: "WattTime",
