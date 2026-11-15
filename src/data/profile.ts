@@ -34,6 +34,7 @@ export const profile = {
     degree:
       "B.S. Computer Science, Concentration in Artificial Intelligence and Machine Learning",
     school: "Cal State University, Fullerton",
+    logoHref: "/csuf-logo.png",
     dates: "Expected Dec 2027",
   },
   skills: [

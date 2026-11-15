@@ -155,7 +155,14 @@ export function ProfileRoom() {
 
         <Card title="Education">
           <div className="flex gap-3">
-            <CompanyMark name={profile.education.school} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={profile.education.logoHref}
+              alt={`${profile.education.school} logo`}
+              width={48}
+              height={48}
+              className="h-12 w-12 shrink-0 rounded object-cover"
+            />
             <div>
               <h3 className="text-[15px] font-semibold text-li-text">
                 {profile.education.school}
