@@ -195,6 +195,14 @@ function RepositoryList({ repos }: { repos: ListedRepo[] }) {
             <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]">
               {repo.kind}
             </span>
+            {repo.badges?.map((badge) => (
+              <span
+                key={badge}
+                className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]"
+              >
+                {badge}
+              </span>
+            ))}
             {repo.pinned ? (
               <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]">
                 Pinned

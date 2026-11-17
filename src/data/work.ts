@@ -54,6 +54,7 @@ export const repos = [
       "Vercel",
     ],
     kind: "Personal",
+    badges: ["Live Demo"],
     affiliation: "Personal Project · Aug 2026",
     pitch:
       "Shared calendar, notes, and map for invite-code workspaces, with realtime sync, RSVPs, in-app notifications, and ICS import.",

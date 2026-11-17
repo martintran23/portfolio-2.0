@@ -30,6 +30,7 @@ export type ListedRepo = {
   external: boolean;
   pinned: boolean;
   kind: RepoKind;
+  badges?: string[];
 };
 
 export const listedRepos: ListedRepo[] = [
@@ -54,6 +55,7 @@ export const listedRepos: ListedRepo[] = [
     external: false,
     pinned: true,
     kind: "Personal",
+    badges: ["Live Demo"],
   },
   {
     name: "WattTime",

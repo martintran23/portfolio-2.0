@@ -154,6 +154,7 @@ revenuetwin/
 ### 2. WeCalendar
 
 - **Tags:** Next.js, React, TypeScript, Supabase, Postgres, RLS, Realtime, TipTap, Leaflet, Vitest, GitHub Actions, Vercel
+- **Kind pills:** Personal, then Live Demo
 - **Affiliation:** Personal Project · Aug 2026
 - **Pitch:** Shared calendar, notes, and map for invite-code workspaces, with realtime sync, RSVPs, in-app notifications, and ICS import.
 - **GitHub:** https://github.com/martintran23/WeCalendar

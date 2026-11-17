@@ -42,6 +42,16 @@ export function WorkRepo({ repo }: { repo: Repo }) {
           <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]">
             {repo.kind}
           </span>
+          {"badges" in repo
+            ? repo.badges.map((badge) => (
+                <span
+                  key={badge}
+                  className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]"
+                >
+                  {badge}
+                </span>
+              ))
+            : null}
         </div>
         <p className="mt-2 text-sm text-[#59636e]">{repo.affiliation}</p>
       </div>
