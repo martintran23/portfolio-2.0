@@ -21,17 +21,6 @@ function Card({
   );
 }
 
-function CompanyMark({ name }: { name: string }) {
-  return (
-    <div
-      aria-hidden
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-[#e9e5df] text-lg font-semibold text-[#5e5e5e]"
-    >
-      {name[0]}
-    </div>
-  );
-}
-
 export function ProfileRoom() {
   return (
     <div className="min-h-full bg-li-canvas p-2 sm:p-3">
@@ -136,7 +125,14 @@ export function ProfileRoom() {
                   index > 0 ? "mt-4 border-t border-li-border pt-4" : ""
                 }`}
               >
-                <CompanyMark name={job.company} />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={job.logoHref}
+                  alt={`${job.company} logo`}
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 shrink-0 rounded bg-white object-contain"
+                />
                 <div className="min-w-0">
                   <h3 className="text-[15px] font-semibold text-li-text">
                     {job.role}
