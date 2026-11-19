@@ -42,6 +42,16 @@ export function WorkRepo({ repo }: { repo: Repo }) {
           <span className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]">
             {repo.kind}
           </span>
+          {"badges" in repo
+            ? repo.badges.map((badge) => (
+                <span
+                  key={badge}
+                  className="rounded-full border border-[#d1d9e0] px-2 py-0.5 text-xs text-[#59636e]"
+                >
+                  {badge}
+                </span>
+              ))
+            : null}
         </div>
         <p className="mt-2 text-sm text-[#59636e]">{repo.affiliation}</p>
       </div>
@@ -58,6 +68,17 @@ export function WorkRepo({ repo }: { repo: Repo }) {
             <ReadmeSection title="What was built" items={repo.built} />
             <ReadmeSection title="My role" items={repo.role} />
             <ReadmeSection title="Outcome" items={repo.outcome} />
+            <section className="mt-8">
+              <h3 className="border-b border-[#d1d9e0] pb-2 text-xl font-semibold">
+                Narrative file tree
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-[#59636e]">
+                A simplified map of the system, not a clone of the real repo.
+              </p>
+              <pre className="mt-3 overflow-x-auto rounded-md border border-[#d1d9e0] bg-[#f6f8fa] p-4 font-mono text-xs leading-6 text-[#1f2328]">
+                {repo.tree}
+              </pre>
+            </section>
           </div>
         </article>
 

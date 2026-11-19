@@ -70,6 +70,16 @@ body {
   transform: translateX(calc(-50% + 88%)) translateZ(-120px) rotateY(-34deg) scale(0.84);
 }
 
+@media (max-width: 639px) {
+  .room-panel[data-offset="-1"] {
+    transform: translateX(-162%) translateZ(-40px) scale(0.96);
+  }
+
+  .room-panel[data-offset="1"] {
+    transform: translateX(62%) translateZ(-40px) scale(0.96);
+  }
+}
+
 .room-face {
   transition:
     filter 520ms ease,

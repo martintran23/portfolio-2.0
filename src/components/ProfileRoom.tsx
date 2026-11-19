@@ -21,17 +21,6 @@ function Card({
   );
 }
 
-function CompanyMark({ name }: { name: string }) {
-  return (
-    <div
-      aria-hidden
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-[#e9e5df] text-lg font-semibold text-[#5e5e5e]"
-    >
-      {name[0]}
-    </div>
-  );
-}
-
 export function ProfileRoom() {
   return (
     <div className="min-h-full bg-li-canvas p-2 sm:p-3">
@@ -105,7 +94,16 @@ export function ProfileRoom() {
                   href={project.href}
                   className="block h-full overflow-hidden rounded-lg border border-li-border hover:bg-[#f3f2ef]"
                 >
-                  <div className="h-16 bg-[linear-gradient(135deg,#0a66c2,#70b5f9)]" />
+                  <div className="relative h-24 overflow-hidden bg-[#0c2d52] sm:h-28">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={project.imageHref}
+                      alt=""
+                      width={640}
+                      height={360}
+                      className="h-full w-full object-cover opacity-50 mix-blend-screen grayscale contrast-125 brightness-90"
+                    />
+                  </div>
                   <div className="p-3">
                     <p className="text-sm font-semibold text-li-text">
                       {project.name}
@@ -136,7 +134,14 @@ export function ProfileRoom() {
                   index > 0 ? "mt-4 border-t border-li-border pt-4" : ""
                 }`}
               >
-                <CompanyMark name={job.company} />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={job.logoHref}
+                  alt={`${job.company} logo`}
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 shrink-0 rounded bg-white object-contain"
+                />
                 <div className="min-w-0">
                   <h3 className="text-[15px] font-semibold text-li-text">
                     {job.role}

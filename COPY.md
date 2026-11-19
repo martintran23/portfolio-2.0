@@ -14,7 +14,7 @@ Use these on the site unless a later note overrides them.
 - **Name on Profile:** Martin Tran
 - **Featured projects (order):** RevenueTwin, WeCalendar, WattTime
 - **WeCalendar GitHub:** `https://github.com/martintran23/WeCalendar`
-- **WattTime live demo:** include `https://main.d3aftn56t13u83.amplifyapp.com`
+- **WattTime live demo:** none; Amplify hosting expired; keep GitHub only
 - **Pokémon Lab:** not on the site; not a featured Projects card
 - **Phone:** keep off Mail unless you later choose to show it
 - **Audience:** SWE intern recruiting. Do not present as a full-time engineer.
@@ -154,6 +154,7 @@ revenuetwin/
 ### 2. WeCalendar
 
 - **Tags:** Next.js, React, TypeScript, Supabase, Postgres, RLS, Realtime, TipTap, Leaflet, Vitest, GitHub Actions, Vercel
+- **Kind pills:** Personal, then Live Demo
 - **Affiliation:** Personal Project · Aug 2026
 - **Pitch:** Shared calendar, notes, and map for invite-code workspaces, with realtime sync, RSVPs, in-app notifications, and ICS import.
 - **GitHub:** https://github.com/martintran23/WeCalendar
@@ -209,7 +210,7 @@ wecalendar/
 - **Affiliation:** AWS Cloudhacks 2026 at UCI · Apr 2026
 - **Pitch:** Solar usage optimizer that recommends the best times to run household appliances from forecasted solar availability.
 - **GitHub:** https://github.com/martintran23/zotwatt
-- **Live:** https://main.d3aftn56t13u83.amplifyapp.com
+- **Live:** none (Amplify demo hosting expired)
 
 #### Case study
 
@@ -218,33 +219,37 @@ Solar output fluctuates through the day; households don't know when to run high-
 
 **What was built**
 
-- React + TypeScript + Vite dashboard (address search / geolocation, forecasts, recommendations).
-- AWS serverless orchestration: API Gateway + Step Functions + Lambda (fetch → analyze → format).
-- Open-Meteo hourly weather + shortwave radiation → solar potential → LLM-structured appliance advice.
-- Daily automation path for subscribed users / email-style recommendations.
-- Geocoding via Amazon Location Service; deploy via AWS Amplify + CI/CD.
+- React + TypeScript + Vite dashboard with address search, forecast, impact, schedule, and SMS / notification flows.
+- AWS serverless pipeline: API Gateway + Step Functions orchestrating fetch → analyze → format Lambdas.
+- Open-Meteo weather + shortwave radiation → solar potential model → LLM JSON recommendations per appliance.
+- Amazon Location Service / Places for geocoding. Amplify hosting. Separate daily orchestrator path for subscribed users.
 
 **Role**
 
-- Built frontend + designed serverless backend workflow.
-- Optimized LLM prompt / inference path to cut response time 66% (45s → 15s).
-- Resilient orchestration, optimize-first + fallback recommendation strategy.
+- Built the frontend dashboard and designed the Step Functions + Lambda workflow.
+- Tuned the analyze-path LLM prompts to cut end-to-end response time about 66% (45s → 15s).
+- Added an optimize-first path with a fallback recommendation strategy when the primary pass was slow or incomplete.
 
 **Outcome**
 
-- Hackathon delivery with a working solar recommendation pipeline.
-- Quantified latency improvement: 45s → 15s.
+- AWS Cloudhacks 2026 delivery with a working solar recommendation pipeline.
+- Quantified latency improvement: 45s → 15s on the recommendation path.
+- Amplify demo hosting is expired; source remains on GitHub.
 
 #### Narrative file tree
 
 ```
 watttime/
 ├── architecture.md          # Vite app + Step Functions pipeline
-├── pipeline/
-│   ├── fetch/               # Open-Meteo weather + radiation
-│   ├── analyze/             # Solar potential + LLM recommendations
-│   └── format/              # User-facing advice + daily automation
-├── frontend/dashboard/      # Geo search, forecast views, impact flows
+├── src/
+│   ├── dashboard/           # Forecast, impact, schedule, SMS, notifications
+│   └── lib/                 # Open-Meteo, Places, solar model, optimize API
+├── backend/
+│   ├── lambdas/
+│   │   ├── fetch-data/      # Open-Meteo weather + radiation (Python)
+│   │   ├── analyze-data/    # Solar potential + LLM prompts
+│   │   └── formatter/       # User-facing advice payload
+│   └── step-functions/      # Optimize workflow + daily orchestrator
 └── what-id-redo.md          # Usage learning, confidence scores, utility rates
 ```
 

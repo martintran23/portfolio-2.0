@@ -18,6 +18,7 @@ export const profile = {
       company: "OpenQQuantify",
       location: "Remote / Vienna, VA",
       dates: "May 2025 - Oct 2025",
+      logoHref: "/openqquantify-logo.png",
       summary:
         "Worked on an AI health assistant that answered questions from FDA drug label data, spanning the data pipeline, APIs, and chat interface.",
     },
@@ -26,6 +27,7 @@ export const profile = {
       company: "Product Manager Accelerator",
       location: "Remote",
       dates: "Jun 2025 - Sep 2025",
+      logoHref: "/pma-logo.png",
       summary:
         "Worked on the backend for Kyrah AI, an emotional support and journaling product, including how journal entries and chat history were stored and served.",
     },
@@ -84,16 +86,19 @@ export const profile = {
       name: "RevenueTwin",
       href: "/work/revenuetwin",
       pitch: "AI revenue audit with deterministic fee math.",
+      imageHref: "/revenuetwin-cover.jpg",
     },
     {
       name: "WeCalendar",
       href: "/work/wecalendar",
       pitch: "Shared calendar, notes, and map with realtime sync.",
+      imageHref: "/wecalendar-cover.jpg",
     },
     {
       name: "WattTime",
       href: "/work/watttime",
       pitch: "Solar usage optimizer on AWS.",
+      imageHref: "/watttime-cover.jpg",
     },
   ],
   resumeHref: "/Martin-Tran-Resume.pdf",
