@@ -94,7 +94,16 @@ export function ProfileRoom() {
                   href={project.href}
                   className="block h-full overflow-hidden rounded-lg border border-li-border hover:bg-[#f3f2ef]"
                 >
-                  <div className="h-16 bg-[linear-gradient(135deg,#0a66c2,#70b5f9)]" />
+                  <div className="relative h-24 overflow-hidden bg-[#0c2d52] sm:h-28">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={project.imageHref}
+                      alt=""
+                      width={640}
+                      height={360}
+                      className="h-full w-full object-cover opacity-50 mix-blend-screen grayscale contrast-125 brightness-90"
+                    />
+                  </div>
                   <div className="p-3">
                     <p className="text-sm font-semibold text-li-text">
                       {project.name}
