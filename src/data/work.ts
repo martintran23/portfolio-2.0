@@ -34,6 +34,15 @@ export const repos = [
       "1st Place Track Winner, Startup We'd Buy Tomorrow (LPL Financial Hackathon 2026).",
       "Working Anderson vertical slice and investigation package on main. Demo cases are synthetic, not production SaaS metrics.",
     ],
+    tree: `revenuetwin/
+├── architecture.md          # Streamlit → services → engine / investigation / AWS
+├── investigation/
+│   ├── investigate.py       # Bedrock Converse tool loop + structured Investigation
+│   └── morgan.py            # Conflicting-evidence hardening + normalization
+├── revenue_engine/
+│   └── calculations.py      # Decimal fee math (LLM never owns arithmetic)
+├── integration/             # S3 evidence, reviews, paced Bedrock (team AWS path)
+└── what-id-redo.md          # Stronger CI, clearer ownership of agent steps, production auth`,
   },
   {
     slug: "wecalendar",
@@ -82,6 +91,16 @@ export const repos = [
       "Live multi-user shared calendar, notes, and map product.",
       "CI runs typecheck, lint, Vitest (14 files / 184 tests), and a production build on every PR.",
     ],
+    tree: `wecalendar/
+├── architecture.md          # AppShell, workspace invites, Supabase clients
+├── supabase/migrations/     # RLS, places, RSVPs, notifications, ICS sync
+├── notes/
+│   ├── editor.tsx           # TipTap + debounced autosave
+│   └── folders.ts           # Shared/private folders, DnD, trash
+├── calendar/                # Month/week/day/year + conflict UX + RSVPs
+├── map/                     # Leaflet pins, geolocation, place search
+├── notifications/           # Bell, prefs, availability nudges
+└── ics/                     # Subscribe, upload, export (SSRF-safe fetch)`,
   },
   {
     slug: "watttime",
@@ -103,24 +122,37 @@ export const repos = [
     pitch:
       "Solar usage optimizer that recommends the best times to run household appliances from forecasted solar availability.",
     github: "https://github.com/martintran23/zotwatt",
-    live: "https://main.d3aftn56t13u83.amplifyapp.com",
+    live: null,
     problem:
       "Solar output fluctuates through the day; households don't know when to run high-load appliances, so they underuse renewables and lean on the grid.",
     built: [
-      "React, TypeScript, and Vite dashboard (address search / geolocation, forecasts, recommendations).",
-      "AWS serverless orchestration: API Gateway, Step Functions, and Lambda (fetch, analyze, format).",
-      "Open-Meteo hourly weather and shortwave radiation to solar potential to LLM-structured appliance advice.",
-      "Daily automation path for subscribed users. Geocoding via Amazon Location Service. Deploy via AWS Amplify and CI/CD.",
+      "React, TypeScript, and Vite dashboard with address search, forecast, impact, schedule, and SMS / notification flows.",
+      "AWS serverless pipeline: API Gateway and Step Functions orchestrating fetch, analyze, and format Lambdas.",
+      "Open-Meteo weather and shortwave radiation into a solar potential model, then LLM JSON recommendations per appliance.",
+      "Amazon Location Service / Places for geocoding. Amplify hosting. A separate daily orchestrator path for subscribed users.",
     ],
     role: [
-      "Built the frontend and designed the serverless backend workflow.",
-      "Optimized the LLM prompt / inference path to cut response time 66% (45s to 15s).",
-      "Resilient orchestration with an optimize-first plus fallback recommendation strategy.",
+      "Built the frontend dashboard and designed the Step Functions plus Lambda workflow.",
+      "Tuned the analyze-path LLM prompts to cut end-to-end response time about 66% (45s to 15s).",
+      "Added an optimize-first path with a fallback recommendation strategy when the primary pass was slow or incomplete.",
     ],
     outcome: [
-      "Hackathon delivery with a working solar recommendation pipeline.",
-      "Quantified latency improvement: 45s to 15s.",
+      "AWS Cloudhacks 2026 delivery with a working solar recommendation pipeline.",
+      "Quantified latency improvement: 45s to 15s on the recommendation path.",
+      "Amplify demo hosting is expired; source remains on GitHub.",
     ],
+    tree: `watttime/
+├── architecture.md          # Vite app + Step Functions pipeline
+├── src/
+│   ├── dashboard/           # Forecast, impact, schedule, SMS, notifications
+│   └── lib/                 # Open-Meteo, Places, solar model, optimize API
+├── backend/
+│   ├── lambdas/
+│   │   ├── fetch-data/      # Open-Meteo weather + radiation (Python)
+│   │   ├── analyze-data/    # Solar potential + LLM prompts
+│   │   └── formatter/       # User-facing advice payload
+│   └── step-functions/      # Optimize workflow + daily orchestrator
+└── what-id-redo.md          # Usage learning, confidence scores, utility rates`,
   },
 ] as const;
 
