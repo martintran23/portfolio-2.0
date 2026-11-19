@@ -64,12 +64,14 @@ function ContributionGraph({ calendar }: { calendar: ContributionCalendar }) {
         </h2>
         <p className="text-xs text-[#0969da]">{calendar.year}</p>
       </div>
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="mt-3 block h-auto w-full"
-        role="img"
-        aria-label={`${calendar.total} contributions in the last year`}
-      >
+      <div className="mt-3 overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          style={{ ["--graph-w" as string]: `${width}px` }}
+          className="block h-auto w-full max-sm:min-w-[var(--graph-w)] sm:min-w-0"
+          role="img"
+          aria-label={`${calendar.total} contributions in the last year`}
+        >
         {calendar.months.map((month) => (
           <text
             key={`${month.label}-${month.index}`}
@@ -105,7 +107,8 @@ function ContributionGraph({ calendar }: { calendar: ContributionCalendar }) {
             />
           )),
         )}
-      </svg>
+        </svg>
+      </div>
       <div className="mt-2 flex flex-wrap items-center justify-end gap-1 text-[10px] text-[#59636e]">
         <span>Less</span>
         {levelColor.map((color) => (

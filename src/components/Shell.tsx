@@ -5,6 +5,24 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getRoomIndex, rooms, visualRoomOffset } from "@/lib/rooms";
 
+function startsInHorizontalScroller(target: EventTarget | null) {
+  if (!(target instanceof Element)) return false;
+  let node: Element | null = target;
+  while (node) {
+    if (node instanceof HTMLElement) {
+      const overflowX = getComputedStyle(node).overflowX;
+      if (
+        (overflowX === "auto" || overflowX === "scroll") &&
+        node.scrollWidth > node.clientWidth + 8
+      ) {
+        return true;
+      }
+    }
+    node = node.parentElement;
+  }
+  return false;
+}
+
 const roomTone: Record<(typeof rooms)[number]["id"], string> = {
   profile: "bg-li-canvas text-li-text",
   work: "bg-white text-[#1f2328]",
@@ -26,6 +44,8 @@ export function Shell({
   const index = displayIndex;
   const room = rooms[index];
   const startX = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
+  const swipeBlocked = useRef(false);
 
   useEffect(() => {
     if (routeIndex === intendedIndex.current) {
@@ -121,14 +141,29 @@ export function Shell({
   function onPointerDown(event: React.PointerEvent<HTMLElement>) {
     if (event.pointerType === "mouse") return;
     startX.current = event.clientX;
+    startY.current = event.clientY;
+    swipeBlocked.current = startsInHorizontalScroller(event.target);
   }
 
   function onPointerUp(event: React.PointerEvent<HTMLElement>) {
-    if (event.pointerType === "mouse" || startX.current == null) return;
-    const delta = event.clientX - startX.current;
+    if (
+      event.pointerType === "mouse" ||
+      startX.current == null ||
+      startY.current == null
+    ) {
+      return;
+    }
+    const deltaX = event.clientX - startX.current;
+    const deltaY = event.clientY - startY.current;
+    const blocked = swipeBlocked.current;
     startX.current = null;
-    if (Math.abs(delta) < 64) return;
-    if (delta < 0) goNext();
+    startY.current = null;
+    swipeBlocked.current = false;
+    if (blocked) return;
+    if (Math.abs(deltaX) < 72 || Math.abs(deltaX) < Math.abs(deltaY) * 1.4) {
+      return;
+    }
+    if (deltaX < 0) goNext();
     else goPrev();
   }
 
@@ -159,7 +194,7 @@ export function Shell({
                 key={item.id}
                 aria-hidden={!active}
                 data-offset={offset}
-                className={`room-panel absolute top-3 bottom-3 left-1/2 w-[min(76vw,28rem)] sm:top-5 sm:bottom-5 sm:w-[min(68vw,54rem)] lg:w-[min(62vw,62rem)] ${
+                className={`room-panel absolute top-2 bottom-2 left-1/2 w-[calc(100%-1rem)] sm:top-5 sm:bottom-5 sm:w-[min(68vw,54rem)] lg:w-[min(62vw,62rem)] ${
                   active ? "z-20" : "z-10"
                 }`}
               >
@@ -198,7 +233,7 @@ export function Shell({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   onClick={() => goTo(itemIndex)}
-                  className={`rounded-full px-4 py-2 text-sm transition ${
+                  className={`rounded-full px-3 py-2 text-sm transition sm:px-4 ${
                     active
                       ? "bg-accent text-white"
                       : "text-stage-muted hover:bg-white hover:text-stage-ink"
