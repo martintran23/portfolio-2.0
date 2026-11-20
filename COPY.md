@@ -16,7 +16,7 @@ Use these on the site unless a later note overrides them.
 - **WeCalendar GitHub:** `https://github.com/martintran23/WeCalendar`
 - **WattTime live demo:** none; Amplify hosting expired; keep GitHub only
 - **Pokémon Lab:** not on the site; not a featured Projects card
-- **Phone:** keep off Mail unless you later choose to show it
+- **Phone:** not on the site or the resume
 - **Audience:** SWE intern recruiting. Do not present as a full-time engineer.
 - **Never on site:** Pairnrd, H15DEN, NASA L'SPACE
 
@@ -271,7 +271,7 @@ Interactive FireRed/LeafGreen-style lab. Use as About personality / a dock extra
 | LinkedIn | https://www.linkedin.com/in/23martintran/ | Yes |
 | GitHub | https://github.com/martintran23 | Yes |
 | Current portfolio | https://martintran23.github.io/portfolio | Optional |
-| Phone | (714) 400-1091 | No (resume only unless you opt in) |
+| Phone | (714) 400-1091 | No |
 
 ---
 
