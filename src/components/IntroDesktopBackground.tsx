@@ -346,8 +346,24 @@ function terrainHeight(x: number, z: number) {
 
 type GrassMesh = { data: Float32Array; count: number };
 
+type NavigatorHints = Navigator & {
+  deviceMemory?: number;
+  connection?: { saveData?: boolean };
+};
+
 let grassCache: GrassMesh | null = null;
 let grassBuild: Promise<GrassMesh> | null = null;
+
+function lightMeadow() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
+  const hints = navigator as NavigatorHints;
+  if (hints.connection?.saveData) return true;
+  if (typeof hints.deviceMemory === "number" && hints.deviceMemory > 0 && hints.deviceMemory <= 4) {
+    return true;
+  }
+  const cores = navigator.hardwareConcurrency;
+  return cores > 0 && cores <= 4;
+}
 
 function yieldFrame() {
   return new Promise<void>((resolve) => {
@@ -355,9 +371,9 @@ function yieldFrame() {
   });
 }
 
-async function buildGrassAsync(): Promise<GrassMesh> {
-  const tufts = 288000;
-  const flowers = 11500;
+async function buildGrassAsync(light: boolean): Promise<GrassMesh> {
+  const tufts = light ? 48000 : 288000;
+  const flowers = light ? 1800 : 11500;
   const verts = tufts * 6 + flowers * 18;
   const data = new Float32Array(verts * 7);
   let t = 11;
@@ -462,9 +478,10 @@ async function buildGrassAsync(): Promise<GrassMesh> {
 }
 
 export function prefetchIntroGrass() {
+  const light = lightMeadow();
   if (grassCache) return Promise.resolve(grassCache);
   if (grassBuild) return grassBuild;
-  grassBuild = buildGrassAsync().then((mesh) => {
+  grassBuild = buildGrassAsync(light).then((mesh) => {
     grassCache = mesh;
     return mesh;
   });
@@ -483,9 +500,10 @@ export function IntroDesktopBackground() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const light = lightMeadow();
     const gl = canvas.getContext("webgl", {
       alpha: false,
-      antialias: true,
+      antialias: !light,
       depth: true,
     });
     if (!gl) return;
@@ -541,7 +559,6 @@ export function IntroDesktopBackground() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
     let start = performance.now();
     let width = 0;
@@ -552,8 +569,8 @@ export function IntroDesktopBackground() {
 
     const draw = (now: number) => {
       if (!width || !height) return;
-      const time = reduce ? 0 : (now - start) / 1000;
-      const sway = reduce ? 0 : Math.sin(time * 0.22) * 0.045;
+      const time = light ? 0 : (now - start) / 1000;
+      const sway = light ? 0 : Math.sin(time * 0.22) * 0.045;
       const aspect = width / Math.max(1, height);
       const proj = perspective((48 * Math.PI) / 180, aspect, 0.05, 40);
       const view = lookAt(
@@ -609,7 +626,7 @@ export function IntroDesktopBackground() {
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5);
       const nextW = Math.max(1, Math.round(rect.width * dpr));
       const nextH = Math.max(1, Math.round(rect.height * dpr));
       if (nextW === width && nextH === height) return;
@@ -633,7 +650,7 @@ export function IntroDesktopBackground() {
       start = performance.now();
       draw(start);
       setReady(true);
-      if (!reduce) raf = requestAnimationFrame(frame);
+      if (!light) raf = requestAnimationFrame(frame);
     });
 
     return () => {
